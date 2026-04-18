@@ -1,0 +1,120 @@
+<ion-header class="ion-no-border">
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-button routerLink="/upload" class="nav-btn">
+        <ion-icon name="arrow-back-outline" slot="icon-only"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+    <ion-title class="app-title">Mis Facturas</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="cargarFacturas()" class="nav-btn">
+        <ion-icon name="refresh-outline" slot="icon-only"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="facturas-content">
+
+  <!-- Resumen -->
+  <div class="summary-strip">
+    <div class="summary-item">
+      <span class="si-value">{{ totalFacturas }}</span>
+      <span class="si-label">Total</span>
+    </div>
+    <div class="summary-divider"></div>
+    <div class="summary-item">
+      <span class="si-value pending">{{ totalPendientes }}</span>
+      <span class="si-label">Pendientes</span>
+    </div>
+    <div class="summary-divider"></div>
+    <div class="summary-item">
+      <span class="si-value paid">{{ totalPagadas }}</span>
+      <span class="si-label">Pagadas</span>
+    </div>
+    <div class="summary-divider"></div>
+    <div class="summary-item">
+      <span class="si-value amount">{{ montoPendiente | currency:'COP':'$':'1.0-0' }}</span>
+      <span class="si-label">Por pagar</span>
+    </div>
+  </div>
+
+  <!-- Filtros -->
+  <div class="filter-bar">
+    <button class="filter-btn" [class.active]="filtroActivo === 'todos'"
+      (click)="setFiltro('todos')">Todos</button>
+    <button class="filter-btn" [class.active]="filtroActivo === 'pendiente'"
+      (click)="setFiltro('pendiente')">Pendientes</button>
+    <button class="filter-btn" [class.active]="filtroActivo === 'pagada'"
+      (click)="setFiltro('pagada')">Pagadas</button>
+    <button class="filter-btn" [class.active]="filtroActivo === 'vencida'"
+      (click)="setFiltro('vencida')">Vencidas</button>
+  </div>
+
+  <!-- Búsqueda -->
+  <div class="search-bar">
+    <ion-icon name="search-outline"></ion-icon>
+    <input type="text" placeholder="Buscar por proveedor, número..."
+      [(ngModel)]="busqueda" (input)="filtrarLocal()">
+    <button *ngIf="busqueda" (click)="busqueda=''; filtrarLocal()">
+      <ion-icon name="close-outline"></ion-icon>
+    </button>
+  </div>
+
+  <!-- Loading -->
+  <div class="loading-state" *ngIf="cargando">
+    <div class="loading-ring"></div>
+    <p>Cargando facturas...</p>
+  </div>
+
+  <!-- Empty state -->
+  <div class="empty-state" *ngIf="!cargando && facturasFiltradas.length === 0">
+    <ion-icon name="document-text-outline"></ion-icon>
+    <h3>Sin facturas</h3>
+    <p>{{ busqueda ? 'No hay resultados para tu búsqueda' : 'Sube tu primera factura para comenzar' }}</p>
+    <button class="empty-btn" routerLink="/upload">
+      <ion-icon name="add-outline"></ion-icon>
+      Subir factura
+    </button>
+  </div>
+
+  <!-- Lista -->
+  <div class="facturas-list" *ngIf="!cargando && facturasFiltradas.length > 0">
+    <div class="factura-card"
+      *ngFor="let f of facturasFiltradas; trackBy: trackById"
+      (click)="verDetalle(f)">
+
+      <div class="fc-left">
+        <div class="fc-estado" [ngClass]="f.estado">
+          <span class="estado-dot"></span>
+        </div>
+        <div class="fc-info">
+          <p class="fc-numero">{{ f.numero || '—' }}</p>
+          <p class="fc-proveedor">{{ f.proveedor_nombre || '—' }}</p>
+          <p class="fc-fecha">
+            {{ f.fecha_emision ? (f.fecha_emision | date:'dd MMM yyyy') : '—' }}
+          </p>
+        </div>
+      </div>
+
+      <div class="fc-right">
+        <p class="fc-total">{{ (f.total_pagar || 0) | currency:'COP':'$':'1.0-0' }}</p>
+        <span class="fc-badge" [ngClass]="f.estado">
+          {{ estadoLabel(f.estado) }}
+        </span>
+        <p class="fc-vence" *ngIf="f.fecha_vencimiento">
+          Vence {{ f.fecha_vencimiento | date:'dd MMM' }}
+        </p>
+      </div>
+
+    </div>
+  </div>
+
+</ion-content>
+
+<!-- FAB -->
+<ion-fab vertical="bottom" horizontal="end" slot="fixed">
+  <ion-fab-button routerLink="/upload" color="success">
+    <ion-icon name="add-outline"></ion-icon>
+  </ion-fab-button>
+</ion-fab>

@@ -1,0 +1,236 @@
+<ion-header class="ion-no-border">
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-button routerLink="/facturas" class="nav-btn">
+        <ion-icon name="arrow-back-outline" slot="icon-only"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+    <ion-title class="app-title">Detalle Factura</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="compartir()" class="nav-btn">
+        <ion-icon name="share-outline" slot="icon-only"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="detalle-content">
+
+  <!-- Loading -->
+  <div class="loading-state" *ngIf="cargando">
+    <div class="loading-ring"></div>
+    <p>Cargando detalle...</p>
+  </div>
+
+  <div *ngIf="!cargando && factura">
+
+    <!-- Estado banner -->
+    <div class="estado-banner" [ngClass]="factura.estado">
+      <div class="eb-left">
+        <ion-icon [name]="iconoEstado(factura.estado)"></ion-icon>
+        <span>{{ estadoLabel(factura.estado) }}</span>
+      </div>
+      <span class="eb-fuente">{{ factura.fuente === 'xml' ? 'XML DIAN' : 'OCR' }}</span>
+    </div>
+
+    <!-- Número y proveedor -->
+    <div class="factura-hero">
+      <p class="fh-numero">{{ factura.numero }}</p>
+      <p class="fh-proveedor">{{ factura.proveedor_nombre }}</p>
+      <p class="fh-nit">NIT {{ factura.proveedor_nit }}</p>
+    </div>
+
+    <!-- Grid de datos principales -->
+    <div class="data-card">
+      <div class="data-grid">
+        <div class="dg-item">
+          <p class="dg-label">Fecha emisión</p>
+          <p class="dg-value">{{ factura.fecha_emision ? (factura.fecha_emision | date:'dd MMM yyyy') : '—' }}</p>
+        </div>
+        <div class="dg-item">
+          <p class="dg-label">Vencimiento</p>
+          <p class="dg-value" [class.danger]="esVencida(factura)">
+            {{ factura.fecha_vencimiento ? (factura.fecha_vencimiento | date:'dd MMM yyyy') : '—' }}
+          </p>
+        </div>
+        <div class="dg-item">
+          <p class="dg-label">Cliente</p>
+          <p class="dg-value">{{ factura.cliente_nombre || '—' }}</p>
+        </div>
+        <div class="dg-item">
+          <p class="dg-label">NIT Cliente</p>
+          <p class="dg-value">{{ factura.cliente_nit || '—' }}</p>
+        </div>
+        <div class="dg-item">
+          <p class="dg-label">Tipo</p>
+          <p class="dg-value">{{ factura.tipo || '01' }}</p>
+        </div>
+        <div class="dg-item">
+          <p class="dg-label">Moneda</p>
+          <p class="dg-value">{{ factura.moneda || 'COP' }}</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Ítems -->
+    <div class="section" *ngIf="items.length > 0">
+      <p class="section-title">
+        <ion-icon name="list-outline"></ion-icon>
+        Ítems ({{ items.length }})
+      </p>
+      <div class="items-table">
+        <div class="it-header">
+          <span>Descripción</span>
+          <span>Cant.</span>
+          <span>Total</span>
+        </div>
+        <div class="it-row" *ngFor="let item of items">
+          <span class="it-desc">{{ item.descripcion }}</span>
+          <span class="it-qty">{{ item.cantidad }}</span>
+          <span class="it-val">{{ item.valor_total | currency:'COP':'$':'1.0-0' }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Impuestos -->
+    <div class="section" *ngIf="impuestos.length > 0">
+      <p class="section-title">
+        <ion-icon name="receipt-outline"></ion-icon>
+        Impuestos
+      </p>
+      <div class="tax-list">
+        <div class="tax-row" *ngFor="let imp of impuestos">
+          <span class="tax-name">{{ imp.nombre }} {{ imp.porcentaje }}%</span>
+          <span class="tax-base">Base: {{ imp.base | currency:'COP':'$':'1.0-0' }}</span>
+          <span class="tax-val">{{ imp.valor | currency:'COP':'$':'1.0-0' }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Totales -->
+    <div class="totales-card">
+      <div class="total-row">
+        <span>Subtotal</span>
+        <span>{{ factura.subtotal | currency:'COP':'$':'1.0-0' }}</span>
+      </div>
+      <div class="total-row">
+        <span>Impuestos</span>
+        <span>{{ factura.total_impuestos | currency:'COP':'$':'1.0-0' }}</span>
+      </div>
+      <div class="total-row total-final">
+        <span>Total a pagar</span>
+        <span>{{ factura.total_pagar | currency:'COP':'$':'1.0-0' }}</span>
+      </div>
+    </div>
+
+    <!-- CUFE -->
+    <div class="section" *ngIf="factura.cufe">
+      <p class="section-title">
+        <ion-icon name="shield-checkmark-outline"></ion-icon>
+        Verificación DIAN
+      </p>
+      <div class="cufe-card">
+        <p class="cufe-label">CUFE</p>
+        <p class="cufe-value">{{ factura.cufe }}</p>
+        <button class="cufe-copy" (click)="copiarCufe()">
+          <ion-icon name="copy-outline"></ion-icon>
+          Copiar
+        </button>
+      </div>
+    </div>
+
+    <!-- Pago info si está pagada -->
+    <div class="section" *ngIf="factura.estado === 'pagada' && pagos.length > 0">
+      <p class="section-title">
+        <ion-icon name="checkmark-circle-outline"></ion-icon>
+        Información de pago
+      </p>
+      <div class="data-card">
+        <div class="data-grid">
+          <div class="dg-item">
+            <p class="dg-label">Forma de pago</p>
+            <p class="dg-value">{{ pagos[0].forma || '—' }}</p>
+          </div>
+          <div class="dg-item">
+            <p class="dg-label">Fecha pago</p>
+            <p class="dg-value">
+              {{ pagos[0].fecha_pago ? (pagos[0].fecha_pago | date:'dd MMM yyyy') : '—' }}
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Acciones -->
+    <div class="acciones">
+
+      <button class="accion-btn success"
+        *ngIf="factura.estado !== 'pagada'"
+        (click)="mostrarModalPago = true">
+        <ion-icon name="checkmark-circle-outline"></ion-icon>
+        Marcar como pagada
+      </button>
+
+      <button class="accion-btn danger"
+        *ngIf="factura.estado === 'pagada'"
+        (click)="desmarcarPago()">
+        <ion-icon name="close-circle-outline"></ion-icon>
+        Marcar como pendiente
+      </button>
+
+      <button class="accion-btn secondary" (click)="compartir()">
+        <ion-icon name="share-outline"></ion-icon>
+        Compartir resumen
+      </button>
+
+    </div>
+
+  </div>
+
+  <!-- Error state -->
+  <div class="empty-state" *ngIf="!cargando && !factura">
+    <ion-icon name="alert-circle-outline"></ion-icon>
+    <h3>Factura no encontrada</h3>
+    <button class="empty-btn" routerLink="/facturas">
+      Volver a facturas
+    </button>
+  </div>
+
+</ion-content>
+
+<!-- Modal marcar como pagada -->
+<div class="modal-overlay" *ngIf="mostrarModalPago" (click)="mostrarModalPago = false">
+  <div class="modal-card" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <p class="modal-title">Registrar pago</p>
+      <button class="modal-close" (click)="mostrarModalPago = false">
+        <ion-icon name="close-outline"></ion-icon>
+      </button>
+    </div>
+
+    <div class="modal-body">
+      <div class="field">
+        <label>Fecha de pago</label>
+        <input type="date" [(ngModel)]="fechaPago" [max]="hoy">
+      </div>
+      <div class="field">
+        <label>Forma de pago</label>
+        <select [(ngModel)]="formaPago">
+          <option value="Transferencia">Transferencia bancaria</option>
+          <option value="Efectivo">Efectivo</option>
+          <option value="Cheque">Cheque</option>
+          <option value="Tarjeta">Tarjeta</option>
+          <option value="PSE">PSE</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <button class="modal-btn secondary" (click)="mostrarModalPago = false">Cancelar</button>
+      <button class="modal-btn primary" (click)="confirmarPago()" [disabled]="guardandoPago">
+        <ion-icon name="checkmark-outline"></ion-icon>
+        {{ guardandoPago ? 'Guardando...' : 'Confirmar pago' }}
+      </button>
+    </div>
+  </div>
+</div>

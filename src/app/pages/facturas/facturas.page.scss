@@ -1,0 +1,359 @@
+:host {
+  --primary:   #00D68F;
+  --surface:   #111318;
+  --surface-2: #1A1D24;
+  --surface-3: #22262F;
+  --border:    rgba(255,255,255,0.08);
+  --text-1:    #F0F2F5;
+  --text-2:    #8B919E;
+  --text-3:    #555B67;
+  --danger:    #FF4757;
+  --warn:      #FFB142;
+  --radius:    14px;
+  --radius-sm: 10px;
+}
+
+ion-toolbar {
+  --background:   var(--surface);
+  --border-width: 0;
+  padding: 4px 8px;
+}
+
+.app-title {
+  --color: var(--text-1);
+  font-weight: 700;
+  font-size: 17px;
+  letter-spacing: -0.3px;
+}
+
+.nav-btn { --color: var(--text-2); }
+
+.facturas-content {
+  --background:     var(--surface);
+  --padding-bottom: 80px;
+}
+
+// ── Summary ───────────────────────────────────────────────────────
+.summary-strip {
+  display: flex;
+  align-items: center;
+  background: var(--surface-2);
+  border-bottom: 1px solid var(--border);
+  padding: 16px 20px;
+  gap: 0;
+}
+
+.summary-item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+}
+
+.summary-divider {
+  width: 1px;
+  height: 32px;
+  background: var(--border);
+}
+
+.si-value {
+  font-size: 18px;
+  font-weight: 800;
+  color: var(--text-1);
+  letter-spacing: -0.5px;
+
+  &.pending { color: var(--warn); }
+  &.paid    { color: var(--primary); }
+  &.amount  { font-size: 14px; color: var(--danger); }
+}
+
+.si-label {
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--text-3);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+// ── Filtros ───────────────────────────────────────────────────────
+.filter-bar {
+  display: flex;
+  gap: 8px;
+  padding: 16px 20px 0;
+  overflow-x: auto;
+  scrollbar-width: none;
+
+  &::-webkit-scrollbar { display: none; }
+}
+
+.filter-btn {
+  flex-shrink: 0;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 7px 16px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-2);
+  cursor: pointer;
+  transition: all 0.2s;
+
+  &.active {
+    background: var(--primary);
+    border-color: var(--primary);
+    color: #000;
+  }
+}
+
+// ── Búsqueda ──────────────────────────────────────────────────────
+.search-bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 12px 20px 0;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 10px 14px;
+
+  ion-icon {
+    font-size: 16px;
+    color: var(--text-3);
+    flex-shrink: 0;
+  }
+
+  input {
+    flex: 1;
+    background: transparent;
+    border: none;
+    outline: none;
+    font-size: 14px;
+    color: var(--text-1);
+
+    &::placeholder { color: var(--text-3); }
+  }
+
+  button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+
+    ion-icon { font-size: 16px; color: var(--text-3); }
+  }
+}
+
+// ── Loading ───────────────────────────────────────────────────────
+.loading-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  padding: 60px 20px;
+
+  .loading-ring {
+    width: 40px;
+    height: 40px;
+    border: 3px solid var(--surface-3);
+    border-top-color: var(--primary);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+
+  p {
+    font-size: 14px;
+    color: var(--text-2);
+    margin: 0;
+  }
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+// ── Empty state ───────────────────────────────────────────────────
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 60px 40px;
+  text-align: center;
+
+  ion-icon {
+    font-size: 48px;
+    color: var(--text-3);
+  }
+
+  h3 {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--text-1);
+    margin: 0;
+  }
+
+  p {
+    font-size: 14px;
+    color: var(--text-2);
+    margin: 0;
+    line-height: 1.5;
+  }
+
+  .empty-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--primary);
+    border: none;
+    border-radius: var(--radius-sm);
+    padding: 12px 20px;
+    font-size: 14px;
+    font-weight: 700;
+    color: #000;
+    cursor: pointer;
+    margin-top: 8px;
+
+    ion-icon { font-size: 16px; }
+  }
+}
+
+// ── Lista ─────────────────────────────────────────────────────────
+.facturas-list {
+  padding: 16px 20px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.factura-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px;
+  cursor: pointer;
+  transition: all 0.2s;
+
+  &:active {
+    transform: scale(0.99);
+    border-color: rgba(0,214,143,0.2);
+  }
+}
+
+.fc-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+  flex: 1;
+}
+
+.fc-estado {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+
+  .estado-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+  }
+
+  &.pendiente {
+    background: rgba(255,177,66,0.15);
+    .estado-dot { background: var(--warn); }
+  }
+
+  &.pagada {
+    background: rgba(0,214,143,0.15);
+    .estado-dot { background: var(--primary); }
+  }
+
+  &.procesada {
+    background: rgba(83,130,255,0.15);
+    .estado-dot { background: #5382FF; }
+  }
+
+  &.vencida {
+    background: rgba(255,71,87,0.15);
+    .estado-dot { background: var(--danger); }
+  }
+}
+
+.fc-info {
+  min-width: 0;
+
+  .fc-numero {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text-1);
+    margin: 0 0 2px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .fc-proveedor {
+    font-size: 12px;
+    color: var(--text-2);
+    margin: 0 0 2px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 180px;
+  }
+
+  .fc-fecha {
+    font-size: 11px;
+    color: var(--text-3);
+    margin: 0;
+  }
+}
+
+.fc-right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+  flex-shrink: 0;
+
+  .fc-total {
+    font-size: 15px;
+    font-weight: 800;
+    color: var(--text-1);
+    margin: 0;
+    letter-spacing: -0.3px;
+  }
+
+  .fc-badge {
+    font-size: 10px;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: 4px;
+    letter-spacing: 0.3px;
+    text-transform: uppercase;
+
+    &.pendiente { background: rgba(255,177,66,0.15); color: var(--warn); }
+    &.pagada    { background: rgba(0,214,143,0.15);  color: var(--primary); }
+    &.procesada { background: rgba(83,130,255,0.15); color: #5382FF; }
+    &.vencida   { background: rgba(255,71,87,0.15);  color: var(--danger); }
+  }
+
+  .fc-vence {
+    font-size: 10px;
+    color: var(--danger);
+    margin: 0;
+  }
+}
+
+ion-fab-button {
+  --background: var(--primary);
+  --color: #000;
+}

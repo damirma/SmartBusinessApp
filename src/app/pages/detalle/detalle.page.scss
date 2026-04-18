@@ -1,0 +1,541 @@
+:host {
+  --primary:   #00D68F;
+  --surface:   #111318;
+  --surface-2: #1A1D24;
+  --surface-3: #22262F;
+  --border:    rgba(255,255,255,0.08);
+  --text-1:    #F0F2F5;
+  --text-2:    #8B919E;
+  --text-3:    #555B67;
+  --danger:    #FF4757;
+  --warn:      #FFB142;
+  --radius:    14px;
+  --radius-sm: 10px;
+}
+
+ion-toolbar {
+  --background:   var(--surface);
+  --border-width: 0;
+  padding: 4px 8px;
+}
+
+.app-title {
+  --color: var(--text-1);
+  font-weight: 700;
+  font-size: 17px;
+  letter-spacing: -0.3px;
+}
+
+.nav-btn { --color: var(--text-2); }
+
+.detalle-content {
+  --background:     var(--surface);
+  --padding-bottom: 40px;
+}
+
+// ── Loading ───────────────────────────────────────────────────────
+.loading-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  padding: 60px 20px;
+
+  .loading-ring {
+    width: 40px;
+    height: 40px;
+    border: 3px solid var(--surface-3);
+    border-top-color: var(--primary);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+
+  p { font-size: 14px; color: var(--text-2); margin: 0; }
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+// ── Estado banner ─────────────────────────────────────────────────
+.estado-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 20px;
+
+  .eb-left {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    font-weight: 700;
+
+    ion-icon { font-size: 16px; }
+  }
+
+  .eb-fuente {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    opacity: 0.7;
+  }
+
+  &.procesada, &.pendiente {
+    background: rgba(255,177,66,0.1);
+    color: var(--warn);
+  }
+
+  &.pagada {
+    background: rgba(0,214,143,0.1);
+    color: var(--primary);
+  }
+
+  &.vencida {
+    background: rgba(255,71,87,0.1);
+    color: var(--danger);
+  }
+}
+
+// ── Hero ──────────────────────────────────────────────────────────
+.factura-hero {
+  padding: 20px 20px 0;
+
+  .fh-numero {
+    font-size: 28px;
+    font-weight: 800;
+    color: var(--text-1);
+    letter-spacing: -0.8px;
+    margin: 0 0 6px;
+  }
+
+  .fh-proveedor {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text-1);
+    margin: 0 0 4px;
+  }
+
+  .fh-nit {
+    font-size: 12px;
+    color: var(--text-2);
+    margin: 0 0 20px;
+  }
+}
+
+// ── Data card ─────────────────────────────────────────────────────
+.data-card {
+  margin: 0 20px 16px;
+  background: var(--surface-2);
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  overflow: hidden;
+}
+
+.data-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+
+  .dg-item {
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--border);
+
+    &:nth-child(odd)       { border-right: 1px solid var(--border); }
+    &:nth-last-child(-n+2) { border-bottom: none; }
+  }
+
+  .dg-label {
+    font-size: 11px;
+    color: var(--text-3);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-weight: 600;
+    margin: 0 0 4px;
+  }
+
+  .dg-value {
+    font-size: 13px;
+    color: var(--text-1);
+    font-weight: 500;
+    margin: 0;
+    word-break: break-all;
+
+    &.danger { color: var(--danger); }
+  }
+}
+
+// ── Sections ──────────────────────────────────────────────────────
+.section {
+  margin: 0 20px 16px;
+}
+
+.section-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-2);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin: 0 0 10px;
+
+  ion-icon { font-size: 15px; }
+}
+
+// ── Items table ───────────────────────────────────────────────────
+.items-table {
+  background: var(--surface-2);
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  overflow: hidden;
+}
+
+.it-header {
+  display: grid;
+  grid-template-columns: 1fr 60px 90px;
+  padding: 10px 14px;
+  background: var(--surface-3);
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-3);
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}
+
+.it-row {
+  display: grid;
+  grid-template-columns: 1fr 60px 90px;
+  padding: 12px 14px;
+  border-top: 1px solid var(--border);
+  align-items: start;
+
+  .it-desc {
+    font-size: 13px;
+    color: var(--text-1);
+    line-height: 1.4;
+    padding-right: 8px;
+  }
+
+  .it-qty {
+    font-size: 13px;
+    color: var(--text-2);
+    text-align: center;
+  }
+
+  .it-val {
+    font-size: 13px;
+    color: var(--text-1);
+    font-weight: 600;
+    text-align: right;
+  }
+}
+
+// ── Tax list ──────────────────────────────────────────────────────
+.tax-list {
+  background: var(--surface-2);
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  overflow: hidden;
+}
+
+.tax-row {
+  display: flex;
+  align-items: center;
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--border);
+  gap: 8px;
+
+  &:last-child { border-bottom: none; }
+
+  .tax-name {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-1);
+    flex: 1;
+  }
+
+  .tax-base {
+    font-size: 11px;
+    color: var(--text-3);
+  }
+
+  .tax-val {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--warn);
+  }
+}
+
+// ── Totales ───────────────────────────────────────────────────────
+.totales-card {
+  margin: 0 20px 16px;
+  background: var(--surface-2);
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  overflow: hidden;
+}
+
+.total-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border);
+  font-size: 14px;
+  color: var(--text-2);
+
+  &:last-child { border-bottom: none; }
+
+  &.total-final {
+    font-size: 16px;
+    font-weight: 800;
+    color: var(--text-1);
+    background: var(--surface-3);
+
+    span:last-child { color: var(--primary); font-size: 20px; }
+  }
+}
+
+// ── CUFE ──────────────────────────────────────────────────────────
+.cufe-card {
+  background: var(--surface-2);
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  padding: 14px 16px;
+
+  .cufe-label {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--text-3);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin: 0 0 6px;
+  }
+
+  .cufe-value {
+    font-size: 11px;
+    color: var(--text-2);
+    word-break: break-all;
+    line-height: 1.6;
+    margin: 0 0 10px;
+    font-family: monospace;
+  }
+
+  .cufe-copy {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--surface-3);
+    border: 1px solid var(--border);
+    border-radius: 7px;
+    padding: 7px 12px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-2);
+    cursor: pointer;
+
+    ion-icon { font-size: 14px; }
+
+    &:active { transform: scale(0.97); }
+  }
+}
+
+// ── Acciones ──────────────────────────────────────────────────────
+.acciones {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 0 20px 20px;
+}
+
+.accion-btn {
+  width: 100%;
+  border: none;
+  border-radius: var(--radius-sm);
+  padding: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+
+  ion-icon { font-size: 18px; }
+
+  &:active { transform: scale(0.98); }
+
+  &.success {
+    background: var(--primary);
+    color: #000;
+  }
+
+  &.danger {
+    background: rgba(255,71,87,0.15);
+    color: var(--danger);
+    border: 1px solid rgba(255,71,87,0.3);
+  }
+
+  &.secondary {
+    background: var(--surface-2);
+    color: var(--text-2);
+    border: 1px solid var(--border);
+  }
+}
+
+// ── Empty state ───────────────────────────────────────────────────
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 60px 40px;
+  text-align: center;
+
+  ion-icon { font-size: 48px; color: var(--text-3); }
+
+  h3 { font-size: 18px; font-weight: 700; color: var(--text-1); margin: 0; }
+
+  .empty-btn {
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 12px 20px;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-2);
+    cursor: pointer;
+  }
+}
+
+// ── Modal ─────────────────────────────────────────────────────────
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.7);
+  display: flex;
+  align-items: flex-end;
+  z-index: 1000;
+  animation: fadeIn 0.2s ease;
+}
+
+.modal-card {
+  width: 100%;
+  background: var(--surface-2);
+  border-radius: 20px 20px 0 0;
+  border-top: 1px solid var(--border);
+  animation: slideUp 0.3s cubic-bezier(0.16,1,0.3,1);
+}
+
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 20px 0;
+
+  .modal-title {
+    font-size: 17px;
+    font-weight: 700;
+    color: var(--text-1);
+    margin: 0;
+  }
+
+  .modal-close {
+    background: var(--surface-3);
+    border: none;
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+
+    ion-icon { font-size: 18px; color: var(--text-2); }
+  }
+}
+
+.modal-body {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+
+  label {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--text-2);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  input, select {
+    background: var(--surface-3);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 12px 14px;
+    font-size: 14px;
+    color: var(--text-1);
+    outline: none;
+    width: 100%;
+    box-sizing: border-box;
+
+    &:focus { border-color: var(--primary); }
+
+    option { background: var(--surface-3); }
+  }
+}
+
+.modal-footer {
+  display: flex;
+  gap: 10px;
+  padding: 0 20px 32px;
+}
+
+.modal-btn {
+  flex: 1;
+  border: none;
+  border-radius: var(--radius-sm);
+  padding: 14px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: all 0.2s;
+
+  ion-icon { font-size: 16px; }
+
+  &.primary {
+    background: var(--primary);
+    color: #000;
+    &:disabled { opacity: 0.5; }
+  }
+
+  &.secondary {
+    background: var(--surface-3);
+    color: var(--text-2);
+    border: 1px solid var(--border);
+  }
+
+  &:active { transform: scale(0.97); }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from { transform: translateY(100%); }
+  to   { transform: translateY(0); }
+}
