@@ -1,0 +1,198 @@
+<ion-header class="ion-no-border">
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <div class="logo-mark">SB</div>
+    </ion-buttons>
+    <ion-title class="app-title">SmartBusiness</ion-title>
+    <ion-buttons slot="end">
+      <ion-button routerLink="/facturas" class="nav-btn">
+        <ion-icon name="grid-outline" slot="icon-only"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="upload-content">
+
+  <div class="hero-section">
+    <div class="hero-badge">
+      <ion-icon name="shield-checkmark-outline"></ion-icon>
+      <span>DIAN · Gemini Vision</span>
+    </div>
+    <h1 class="hero-title">Procesar<br><span class="accent">Factura</span></h1>
+    <p class="hero-sub">XML electrónico · PDF · Imagen · ZIP</p>
+  </div>
+
+  <div class="drop-zone"
+       [class.has-file]="archivoSeleccionado"
+       [class.dragging]="dragging"
+       (dragover)="onDragOver($event)"
+       (dragleave)="dragging = false"
+       (drop)="onDrop($event)"
+       (click)="!archivoSeleccionado && fileInput.click()">
+
+    <input #fileInput type="file"
+      accept=".xml,.pdf,.zip,.jpg,.jpeg,.png"
+      (change)="onFileSelected($event)"
+      style="display:none">
+
+    <div *ngIf="!archivoSeleccionado" class="drop-empty">
+      <div class="drop-icon-ring">
+        <ion-icon name="cloud-upload-outline"></ion-icon>
+      </div>
+      <p class="drop-label">Arrastra aquí o toca para seleccionar</p>
+      <div class="format-chips">
+        <span class="chip xml">XML</span>
+        <span class="chip pdf">PDF</span>
+        <span class="chip zip">ZIP</span>
+        <span class="chip img">IMG</span>
+      </div>
+    </div>
+
+    <div *ngIf="archivoSeleccionado" class="drop-filled">
+      <div class="file-icon-wrap" [ngClass]="tipoArchivo.toLowerCase()">
+        <ion-icon [name]="iconoArchivo"></ion-icon>
+      </div>
+      <div class="file-info">
+        <p class="file-name">{{ archivoSeleccionado.name }}</p>
+        <p class="file-meta">{{ (archivoSeleccionado.size / 1024).toFixed(1) }} KB · {{ tipoArchivo }}</p>
+      </div>
+      <button class="remove-btn" (click)="$event.stopPropagation(); limpiar()">
+        <ion-icon name="close-outline"></ion-icon>
+      </button>
+    </div>
+  </div>
+
+  <div class="zip-inspector" *ngIf="zipInfo">
+    <div class="zip-header">
+      <ion-icon name="folder-open-outline"></ion-icon>
+      <span>Contenido del ZIP</span>
+      <span class="zip-badge" [class.ok]="zipInfo.valido" [class.warn]="!zipInfo.valido">
+        {{ zipInfo.valido ? 'Válido' : 'Incompleto' }}
+      </span>
+    </div>
+    <div class="zip-files">
+      <div class="zip-file" [class.found]="zipInfo.tieneXml">
+        <ion-icon [name]="zipInfo.tieneXml ? 'checkmark-circle' : 'close-circle'"></ion-icon>
+        <span>Archivo XML (factura electrónica)</span>
+      </div>
+      <div class="zip-file" [class.found]="zipInfo.tienePdf">
+        <ion-icon [name]="zipInfo.tienePdf ? 'checkmark-circle' : 'close-circle'"></ion-icon>
+        <span>Archivo PDF (representación gráfica)</span>
+      </div>
+    </div>
+    <p class="zip-warning" *ngIf="!zipInfo.valido">
+      El ZIP no contiene los archivos requeridos para una factura electrónica DIAN completa.
+    </p>
+  </div>
+
+  <div class="quick-actions" *ngIf="!archivoSeleccionado">
+    <button class="qa-btn" (click)="fileInput.click()">
+      <div class="qa-icon">
+        <ion-icon name="document-text-outline"></ion-icon>
+      </div>
+      <span>Seleccionar archivo</span>
+    </button>
+    <button class="qa-btn" (click)="tomarFoto()">
+      <div class="qa-icon">
+        <ion-icon name="camera-outline"></ion-icon>
+      </div>
+      <span>Tomar foto</span>
+    </button>
+  </div>
+
+  <div class="action-section" *ngIf="archivoSeleccionado && !procesando && !resultado">
+    <button class="process-btn"
+      [disabled]="zipInfo && !zipInfo.valido"
+      (click)="procesarFactura()">
+      <ion-icon name="sparkles-outline"></ion-icon>
+      <span>Analizar con IA</span>
+    </button>
+    <p class="process-hint" *ngIf="tipoArchivo === 'ZIP' && zipInfo?.valido">
+      Se usará el XML como fuente principal
+    </p>
+    <p class="process-hint" *ngIf="tipoArchivo === 'XML'">
+      Parseo directo · sin consumo de IA
+    </p>
+    <p class="process-hint" *ngIf="tipoArchivo === 'PDF' || tipoArchivo === 'Imagen'">
+      Gemini Vision analizará el documento
+    </p>
+  </div>
+
+  <div class="processing-overlay" *ngIf="procesando">
+    <div class="processing-card">
+      <div class="pulse-ring"></div>
+      <div class="processing-icon">
+        <ion-icon name="sparkles-outline"></ion-icon>
+      </div>
+      <p class="processing-label">{{ mensajeProceso }}</p>
+      <div class="processing-steps">
+        <div class="step" [class.active]="procesoStep >= 1">Leyendo documento</div>
+        <div class="step" [class.active]="procesoStep >= 2">Extrayendo datos</div>
+        <div class="step" [class.active]="procesoStep >= 3">Guardando</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="result-card" *ngIf="resultado">
+    <div class="result-header">
+      <div class="result-status">
+        <ion-icon name="checkmark-circle"></ion-icon>
+        <span>Procesada exitosamente</span>
+      </div>
+      <span class="result-source">
+        {{ resultado.data?.fuente === 'xml' ? 'XML DIAN' : 'OCR Gemini' }}
+      </span>
+    </div>
+
+    <div class="result-number">{{ resultado.data?.documento?.numero }}</div>
+
+    <div class="result-grid">
+      <div class="rg-item">
+        <p class="rg-label">Proveedor</p>
+        <p class="rg-value">{{ resultado.data?.proveedor?.nombre }}</p>
+      </div>
+      <div class="rg-item">
+        <p class="rg-label">NIT</p>
+        <p class="rg-value">{{ resultado.data?.proveedor?.nit }}</p>
+      </div>
+      <div class="rg-item">
+        <p class="rg-label">Fecha emisión</p>
+        <p class="rg-value">{{ resultado.data?.documento?.fecha_emision }}</p>
+      </div>
+      <div class="rg-item">
+        <p class="rg-label">Vencimiento</p>
+        <p class="rg-value">{{ resultado.data?.pago?.fecha_vencimiento || '—' }}</p>
+      </div>
+    </div>
+
+    <div class="result-total">
+      <span class="total-label">Total a pagar</span>
+      <span class="total-value">
+        {{ resultado.data?.totales?.total_pagar | currency:'COP':'symbol-narrow':'1.0-0' }}
+      </span>
+    </div>
+
+    <div class="result-items" *ngIf="resultado.data?.items?.length">
+      <p class="items-title">{{ resultado.data.items.length }} ítem(s)</p>
+      <div class="item-row" *ngFor="let item of resultado.data.items">
+        <span class="item-desc">{{ item.descripcion }}</span>
+        <span class="item-val">
+          {{ item.valor_total | currency:'COP':'symbol-narrow':'1.0-0' }}
+        </span>
+      </div>
+    </div>
+
+    <div class="result-actions">
+      <button class="ra-btn primary" routerLink="/facturas">
+        <ion-icon name="grid-outline"></ion-icon>
+        Ver mis facturas
+      </button>
+      <button class="ra-btn secondary" (click)="limpiar()">
+        <ion-icon name="add-outline"></ion-icon>
+        Nueva factura
+      </button>
+    </div>
+  </div>
+
+</ion-content>
