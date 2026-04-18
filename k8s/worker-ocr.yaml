@@ -1,0 +1,49 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: worker-ocr
+  namespace: pyme-test
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: worker-ocr
+  template:
+    metadata:
+      labels:
+        app: worker-ocr
+    spec:
+      containers:
+      - name: worker-ocr
+        image: worker-ocr:latest
+        imagePullPolicy: Never
+        ports:
+        - containerPort: 8080
+        envFrom:
+        - secretRef:
+            name: worker-ocr-secret
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8080
+          initialDelaySeconds: 10
+          periodSeconds: 15
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 8080
+          initialDelaySeconds: 5
+          periodSeconds: 10
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: worker-ocr-svc
+  namespace: pyme-test
+spec:
+  selector:
+    app: worker-ocr
+  ports:
+  - port: 80
+    targetPort: 8080
+  type: ClusterIP

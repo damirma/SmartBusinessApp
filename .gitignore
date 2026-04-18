@@ -1,0 +1,13 @@
+# Secretos reales — NUNCA subir
+k8s/*-secret.yaml
+!k8s/*-secret.example.yaml
+
+# Python
+__pycache__/
+*.py[cod]
+.env
+.venv/
+
+# Sistemas operativos
+.DS_Store
+Thumbs.db
