@@ -1,20 +1,170 @@
-<ion-header [translucent]="true">
+<ion-header class="ion-no-border">
   <ion-toolbar>
-    <ion-title>
-      Blank
+    <ion-title class="app-title">
+      <span class="logo-sb">SB</span>
+      SmartBusiness
     </ion-title>
+    <ion-buttons slot="end">
+      <span class="env-badge">DEV</span>
+    </ion-buttons>
   </ion-toolbar>
 </ion-header>
 
-<ion-content [fullscreen]="true">
-  <ion-header collapse="condense">
-    <ion-toolbar>
-      <ion-title size="large">Blank</ion-title>
-    </ion-toolbar>
-  </ion-header>
+<ion-content class="home-content">
 
-  <div id="container">
-    <strong>Ready to create an app?</strong>
-    <p>Start with Ionic <a target="_blank" rel="noopener noreferrer" href="https://ionicframework.com/docs/components">UI Components</a></p>
+  <!-- Header info -->
+  <div class="dev-header">
+    <p class="dev-label">Panel de desarrollo</p>
+    <h1 class="dev-title">SmartBusiness<br><span class="accent">OCR Suite</span></h1>
+    <p class="dev-sub">Selecciona una pantalla para revisar avances</p>
   </div>
+
+  <!-- Sección: Flujo principal -->
+  <div class="section">
+    <p class="section-label">🔄 Flujo principal</p>
+
+    <div class="nav-card" routerLink="/onboarding">
+      <div class="nc-left">
+        <div class="nc-icon green">⚙️</div>
+        <div class="nc-info">
+          <p class="nc-title">Onboarding</p>
+          <p class="nc-sub">Configuración inicial de la PyME</p>
+        </div>
+      </div>
+      <div class="nc-right">
+        <span class="nc-status done">Listo</span>
+        <span class="nc-arrow">›</span>
+      </div>
+    </div>
+
+    <div class="nav-card" routerLink="/upload">
+      <div class="nc-left">
+        <div class="nc-icon blue">📄</div>
+        <div class="nc-info">
+          <p class="nc-title">Subir Factura</p>
+          <p class="nc-sub">XML, PDF, Imagen, ZIP</p>
+        </div>
+      </div>
+      <div class="nc-right">
+        <span class="nc-status done">Listo</span>
+        <span class="nc-arrow">›</span>
+      </div>
+    </div>
+
+    <div class="nav-card" routerLink="/facturas">
+      <div class="nc-left">
+        <div class="nc-icon purple">🗂️</div>
+        <div class="nc-info">
+          <p class="nc-title">Mis Facturas</p>
+          <p class="nc-sub">Lista, filtros y búsqueda</p>
+        </div>
+      </div>
+      <div class="nc-right">
+        <span class="nc-status done">Listo</span>
+        <span class="nc-arrow">›</span>
+      </div>
+    </div>
+
+    <div class="nav-card disabled">
+      <div class="nc-left">
+        <div class="nc-icon gray">📊</div>
+        <div class="nc-info">
+          <p class="nc-title">Dashboard</p>
+          <p class="nc-sub">Analíticas y resumen</p>
+        </div>
+      </div>
+      <div class="nc-right">
+        <span class="nc-status pending">Pendiente</span>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Sección: Infraestructura -->
+  <div class="section">
+    <p class="section-label">☁️ Infraestructura</p>
+
+    <div class="info-row">
+      <span class="ir-label">Worker OCR</span>
+      <span class="ir-value green">http://34.26.53.228:30080</span>
+    </div>
+    <div class="info-row">
+      <span class="ir-label">n8n</span>
+      <span class="ir-value green">smartbusinessdam.sytes.net</span>
+    </div>
+    <div class="info-row">
+      <span class="ir-label">Supabase</span>
+      <span class="ir-value green">zsoynenfjwme...supabase.co</span>
+    </div>
+    <div class="info-row">
+      <span class="ir-label">Kubernetes</span>
+      <span class="ir-value yellow">minikube (dev)</span>
+    </div>
+  </div>
+
+  <!-- Sección: Estado del proyecto -->
+  <div class="section">
+    <p class="section-label">📋 Estado del proyecto</p>
+
+    <div class="progress-item">
+      <div class="pi-header">
+        <span class="pi-label">Capa 1 — Extracción OCR</span>
+        <span class="pi-pct">75%</span>
+      </div>
+      <div class="pi-bar"><div class="pi-fill" style="width:75%; background:#00D68F"></div></div>
+    </div>
+
+    <div class="progress-item">
+      <div class="pi-header">
+        <span class="pi-label">Capa 2 — Almacenamiento</span>
+        <span class="pi-pct">60%</span>
+      </div>
+      <div class="pi-bar"><div class="pi-fill" style="width:60%; background:#5382FF"></div></div>
+    </div>
+
+    <div class="progress-item">
+      <div class="pi-header">
+        <span class="pi-label">Capa 3 — Analíticas</span>
+        <span class="pi-pct">10%</span>
+      </div>
+      <div class="pi-bar"><div class="pi-fill" style="width:10%; background:#FFB142"></div></div>
+    </div>
+
+    <div class="progress-item">
+      <div class="pi-header">
+        <span class="pi-label">App Ionic</span>
+        <span class="pi-pct">50%</span>
+      </div>
+      <div class="pi-bar"><div class="pi-fill" style="width:50%; background:#FF4757"></div></div>
+    </div>
+  </div>
+
+  <!-- Sección: Equipo -->
+  <div class="section">
+    <p class="section-label">👥 Equipo</p>
+    <div class="team-row">
+      <div class="team-card">
+        <div class="tc-avatar" style="background:#00D68F22; color:#00D68F">E</div>
+        <p class="tc-name">Erik</p>
+        <p class="tc-role">Frontend / OCR</p>
+      </div>
+      <div class="team-card">
+        <div class="tc-avatar" style="background:#5382FF22; color:#5382FF">S</div>
+        <p class="tc-name">Samuel</p>
+        <p class="tc-role">Arquitectura</p>
+      </div>
+      <div class="team-card">
+        <div class="tc-avatar" style="background:#FFB14222; color:#FFB142">J</div>
+        <p class="tc-name">Juan Pablo</p>
+        <p class="tc-role">Kubernetes</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <div class="dev-footer">
+    <p>ETITC · DAM · 2026</p>
+    <p>Rama: <span class="accent">erik/desarrollo</span></p>
+  </div>
+
 </ion-content>
