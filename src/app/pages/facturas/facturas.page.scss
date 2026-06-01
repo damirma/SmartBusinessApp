@@ -1,46 +1,29 @@
-:host {
-  --primary:   #00D68F;
-  --surface:   #111318;
-  --surface-2: #1A1D24;
-  --surface-3: #22262F;
-  --border:    rgba(255,255,255,0.08);
-  --text-1:    #F0F2F5;
-  --text-2:    #8B919E;
-  --text-3:    #555B67;
-  --danger:    #FF4757;
-  --warn:      #FFB142;
-  --radius:    14px;
-  --radius-sm: 10px;
-}
-
 ion-toolbar {
-  --background:   var(--surface);
+  --background:   var(--sb-bg-primary);
   --border-width: 0;
   padding: 4px 8px;
 }
 
 .app-title {
-  --color: var(--text-1);
-  font-weight: 700;
+  --color: var(--sb-text-primary);
+  font-weight: var(--sb-font-bold);
   font-size: 17px;
-  letter-spacing: -0.3px;
 }
 
-.nav-btn { --color: var(--text-2); }
+.nav-btn { --color: var(--sb-text-secondary); }
 
 .facturas-content {
-  --background:     var(--surface);
+  --background:     var(--sb-bg-primary);
   --padding-bottom: 80px;
 }
 
-// ── Summary ───────────────────────────────────────────────────────
+// ── Summary strip ─────────────────────────────────────────────────
 .summary-strip {
   display: flex;
   align-items: center;
-  background: var(--surface-2);
-  border-bottom: 1px solid var(--border);
-  padding: 16px 20px;
-  gap: 0;
+  background: var(--sb-bg-card);
+  border-bottom: 1px solid var(--sb-border-subtle);
+  padding: var(--sb-space-md);
 }
 
 .summary-item {
@@ -54,33 +37,45 @@ ion-toolbar {
 .summary-divider {
   width: 1px;
   height: 32px;
-  background: var(--border);
+  background: var(--sb-border-subtle);
 }
 
 .si-value {
-  font-size: 18px;
-  font-weight: 800;
-  color: var(--text-1);
+  font-size: var(--sb-text-lg);
+  font-weight: var(--sb-font-bold);
+  color: var(--sb-text-primary);
   letter-spacing: -0.5px;
 
-  &.pending { color: var(--warn); }
-  &.paid    { color: var(--primary); }
-  &.amount  { font-size: 14px; color: var(--danger); }
+  &.warn   { color: var(--sb-warning); }
+  &.ok     { color: var(--sb-success); }
+  &.danger { font-size: var(--sb-text-sm); color: var(--sb-danger); }
 }
 
 .si-label {
-  font-size: 10px;
-  font-weight: 600;
-  color: var(--text-3);
+  font-size: var(--sb-text-xs);
+  font-weight: var(--sb-font-semibold);
+  color: var(--sb-text-secondary);
   text-transform: uppercase;
   letter-spacing: 0.5px;
+}
+
+.skel-val {
+  width: 28px;
+  height: 20px;
+  border-radius: var(--sb-radius-sm);
+}
+
+.skel-amount {
+  width: 55px;
+  height: 16px;
+  border-radius: var(--sb-radius-sm);
 }
 
 // ── Filtros ───────────────────────────────────────────────────────
 .filter-bar {
   display: flex;
-  gap: 8px;
-  padding: 16px 20px 0;
+  gap: var(--sb-space-sm);
+  padding: var(--sb-space-md) var(--sb-space-md) 0;
   overflow-x: auto;
   scrollbar-width: none;
 
@@ -89,19 +84,20 @@ ion-toolbar {
 
 .filter-btn {
   flex-shrink: 0;
-  background: var(--surface-2);
-  border: 1px solid var(--border);
-  border-radius: 20px;
-  padding: 7px 16px;
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--text-2);
+  background: var(--sb-bg-card);
+  border: 1px solid var(--sb-border-subtle);
+  border-radius: var(--sb-radius-full);
+  padding: 7px var(--sb-space-md);
+  font-size: var(--sb-text-sm);
+  font-weight: var(--sb-font-semibold);
+  color: var(--sb-text-secondary);
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all var(--sb-transition-fast);
+  font-family: var(--sb-font-family);
 
   &.active {
-    background: var(--primary);
-    border-color: var(--primary);
+    background: var(--sb-accent);
+    border-color: var(--sb-accent);
     color: #000;
   }
 }
@@ -111,15 +107,15 @@ ion-toolbar {
   display: flex;
   align-items: center;
   gap: 10px;
-  margin: 12px 20px 0;
-  background: var(--surface-2);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
-  padding: 10px 14px;
+  margin: var(--sb-space-sm) var(--sb-space-md) 0;
+  background: var(--sb-bg-card);
+  border: 1px solid var(--sb-border-subtle);
+  border-radius: var(--sb-radius-md);
+  padding: 10px var(--sb-space-md);
 
   ion-icon {
     font-size: 16px;
-    color: var(--text-3);
+    color: var(--sb-muted);
     flex-shrink: 0;
   }
 
@@ -128,10 +124,11 @@ ion-toolbar {
     background: transparent;
     border: none;
     outline: none;
-    font-size: 14px;
-    color: var(--text-1);
+    font-size: var(--sb-text-sm);
+    color: var(--sb-text-primary);
+    font-family: var(--sb-font-family);
 
-    &::placeholder { color: var(--text-3); }
+    &::placeholder { color: var(--sb-muted); }
   }
 
   button {
@@ -139,161 +136,78 @@ ion-toolbar {
     border: none;
     cursor: pointer;
     padding: 0;
-
-    ion-icon { font-size: 16px; color: var(--text-3); }
-  }
-}
-
-// ── Loading ───────────────────────────────────────────────────────
-.loading-state {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 16px;
-  padding: 60px 20px;
-
-  .loading-ring {
-    width: 40px;
-    height: 40px;
-    border: 3px solid var(--surface-3);
-    border-top-color: var(--primary);
-    border-radius: 50%;
-    animation: spin 0.8s linear infinite;
-  }
-
-  p {
-    font-size: 14px;
-    color: var(--text-2);
-    margin: 0;
-  }
-}
-
-@keyframes spin {
-  to { transform: rotate(360deg); }
-}
-
-// ── Empty state ───────────────────────────────────────────────────
-.empty-state {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 12px;
-  padding: 60px 40px;
-  text-align: center;
-
-  ion-icon {
-    font-size: 48px;
-    color: var(--text-3);
-  }
-
-  h3 {
-    font-size: 18px;
-    font-weight: 700;
-    color: var(--text-1);
-    margin: 0;
-  }
-
-  p {
-    font-size: 14px;
-    color: var(--text-2);
-    margin: 0;
-    line-height: 1.5;
-  }
-
-  .empty-btn {
     display: flex;
-    align-items: center;
-    gap: 8px;
-    background: var(--primary);
-    border: none;
-    border-radius: var(--radius-sm);
-    padding: 12px 20px;
-    font-size: 14px;
-    font-weight: 700;
-    color: #000;
-    cursor: pointer;
-    margin-top: 8px;
 
-    ion-icon { font-size: 16px; }
+    ion-icon { font-size: 16px; color: var(--sb-muted); }
   }
 }
 
 // ── Lista ─────────────────────────────────────────────────────────
 .facturas-list {
-  padding: 16px 20px 0;
+  padding: var(--sb-space-sm) var(--sb-space-md) 0;
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: var(--sb-space-sm);
 }
 
 .factura-card {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  background: var(--surface-2);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 16px;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: border-color var(--sb-transition-fast), transform var(--sb-transition-fast);
 
   &:active {
     transform: scale(0.99);
-    border-color: rgba(0,214,143,0.2);
+    border-color: rgba(0, 214, 143, 0.25);
   }
 }
 
 .fc-left {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: var(--sb-space-sm);
   min-width: 0;
   flex: 1;
 }
 
-.fc-estado {
+// Indicador de estado circular
+.fc-dot-wrap {
   width: 36px;
   height: 36px;
-  border-radius: 10px;
+  border-radius: var(--sb-radius-md);
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
 
-  .estado-dot {
+  .fc-dot {
     width: 10px;
     height: 10px;
     border-radius: 50%;
   }
 
-  &.pendiente {
-    background: rgba(255,177,66,0.15);
-    .estado-dot { background: var(--warn); }
-  }
+  &.pendiente  { background: var(--sb-warning-dim); .fc-dot { background: var(--sb-warning); } }
+  &.pagada     { background: var(--sb-success-dim); .fc-dot { background: var(--sb-success); } }
+  &.procesada  { background: var(--sb-info-dim);    .fc-dot { background: var(--sb-info);    } }
+  &.vencida    { background: var(--sb-danger-dim);  .fc-dot { background: var(--sb-danger);  } }
+}
 
-  &.pagada {
-    background: rgba(0,214,143,0.15);
-    .estado-dot { background: var(--primary); }
-  }
-
-  &.procesada {
-    background: rgba(83,130,255,0.15);
-    .estado-dot { background: #5382FF; }
-  }
-
-  &.vencida {
-    background: rgba(255,71,87,0.15);
-    .estado-dot { background: var(--danger); }
-  }
+.fc-dot-skel {
+  width: 36px;
+  height: 36px;
+  border-radius: var(--sb-radius-md);
+  background: var(--sb-bg-overlay);
+  flex-shrink: 0;
 }
 
 .fc-info {
   min-width: 0;
 
   .fc-numero {
-    font-size: 14px;
-    font-weight: 700;
-    color: var(--text-1);
+    font-size: var(--sb-text-sm);
+    font-weight: var(--sb-font-bold);
+    color: var(--sb-text-primary);
     margin: 0 0 2px;
     white-space: nowrap;
     overflow: hidden;
@@ -301,8 +215,8 @@ ion-toolbar {
   }
 
   .fc-proveedor {
-    font-size: 12px;
-    color: var(--text-2);
+    font-size: var(--sb-text-xs);
+    color: var(--sb-text-secondary);
     margin: 0 0 2px;
     white-space: nowrap;
     overflow: hidden;
@@ -311,8 +225,8 @@ ion-toolbar {
   }
 
   .fc-fecha {
-    font-size: 11px;
-    color: var(--text-3);
+    font-size: var(--sb-text-xs);
+    color: var(--sb-muted);
     margin: 0;
   }
 }
@@ -323,37 +237,27 @@ ion-toolbar {
   align-items: flex-end;
   gap: 4px;
   flex-shrink: 0;
+  margin-left: var(--sb-space-sm);
 
   .fc-total {
-    font-size: 15px;
-    font-weight: 800;
-    color: var(--text-1);
+    font-size: var(--sb-text-base);
+    font-weight: var(--sb-font-bold);
+    color: var(--sb-text-primary);
     margin: 0;
-    letter-spacing: -0.3px;
-  }
-
-  .fc-badge {
-    font-size: 10px;
-    font-weight: 700;
-    padding: 2px 8px;
-    border-radius: 4px;
-    letter-spacing: 0.3px;
-    text-transform: uppercase;
-
-    &.pendiente { background: rgba(255,177,66,0.15); color: var(--warn); }
-    &.pagada    { background: rgba(0,214,143,0.15);  color: var(--primary); }
-    &.procesada { background: rgba(83,130,255,0.15); color: #5382FF; }
-    &.vencida   { background: rgba(255,71,87,0.15);  color: var(--danger); }
+    white-space: nowrap;
   }
 
   .fc-vence {
-    font-size: 10px;
-    color: var(--danger);
+    font-size: var(--sb-text-xs);
+    color: var(--sb-danger);
     margin: 0;
   }
 }
 
+// ── FAB ───────────────────────────────────────────────────────────
 ion-fab-button {
-  --background: var(--primary);
-  --color: #000;
+  --background:       var(--sb-accent);
+  --background-hover: var(--sb-accent-dark);
+  --color:            #000;
+  --box-shadow:       var(--sb-shadow-accent);
 }
