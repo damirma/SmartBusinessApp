@@ -2,7 +2,7 @@ import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule, CurrencyPipe, DatePipe } from '@angular/common';
 import { Router, RouterLink } from '@angular/router';
 import {
-  IonHeader, IonToolbar, IonTitle, IonContent,
+  IonHeader, IonToolbar, IonContent,
   IonIcon, IonSkeletonText
 } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
@@ -20,7 +20,7 @@ import { FacturaService } from '../services/factura';
   standalone: true,
   imports: [
     CommonModule, RouterLink, CurrencyPipe, DatePipe,
-    IonHeader, IonToolbar, IonTitle, IonContent,
+    IonHeader, IonToolbar, IonContent,
     IonIcon, IonSkeletonText,
   ],
 })
