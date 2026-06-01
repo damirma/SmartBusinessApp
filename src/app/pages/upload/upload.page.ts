@@ -10,7 +10,7 @@ import {
   cloudUploadOutline, cameraOutline, documentTextOutline,
   documentOutline, folderOpenOutline, closeOutline,
   checkmarkCircle, closeCircle, arrowForwardOutline,
-  addOutline, alertCircleOutline, refreshOutline
+  addOutline, alertCircleOutline, refreshOutline, imageOutline
 } from 'ionicons/icons';
 import { FacturaService } from '../../services/factura';
 import { RespuestaProcesar } from '../../models';
@@ -58,7 +58,7 @@ export class UploadPage {
       cloudUploadOutline, cameraOutline, documentTextOutline,
       documentOutline, folderOpenOutline, closeOutline,
       checkmarkCircle, closeCircle, arrowForwardOutline,
-      addOutline, alertCircleOutline, refreshOutline
+      addOutline, alertCircleOutline, refreshOutline, imageOutline
     });
   }
 
