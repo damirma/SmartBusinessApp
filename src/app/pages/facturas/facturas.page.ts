@@ -1,11 +1,10 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule, CurrencyPipe, DatePipe } from '@angular/common';
 import { RouterLink, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import {
   IonHeader, IonToolbar, IonTitle, IonContent,
-  IonButton, IonIcon, IonButtons, IonFab, IonFabButton,
-  IonSkeletonText
+  IonButton, IonIcon, IonButtons, IonFab, IonFabButton
 } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
 import {
@@ -22,14 +21,10 @@ import { FacturaService } from '../../services/factura';
   imports: [
     CommonModule, RouterLink, FormsModule, CurrencyPipe, DatePipe,
     IonHeader, IonToolbar, IonTitle, IonContent,
-    IonButton, IonIcon, IonButtons, IonFab, IonFabButton,
-    IonSkeletonText
+    IonButton, IonIcon, IonButtons, IonFab, IonFabButton
   ],
 })
 export class FacturasPage implements OnInit {
-
-  private facturaService = inject(FacturaService);
-  private router         = inject(Router);
 
   facturas: any[]         = [];
   facturasFiltradas: any[] = [];
@@ -46,7 +41,10 @@ export class FacturasPage implements OnInit {
       .reduce((sum, f) => sum + (f.total_pagar || 0), 0);
   }
 
-  constructor() {
+  constructor(
+    private facturaService: FacturaService,
+    private router: Router
+  ) {
     addIcons({
       arrowBackOutline, refreshOutline, searchOutline,
       closeOutline, documentTextOutline, addOutline
@@ -93,14 +91,6 @@ export class FacturasPage implements OnInit {
     }
 
     this.facturasFiltradas = lista;
-  }
-
-  estadoClass(estado: string): string {
-    const map: Record<string, string> = {
-      pagada: 'pagada', pendiente: 'pendiente',
-      procesada: 'pendiente', vencida: 'vencida',
-    };
-    return map[estado] ?? 'pendiente';
   }
 
   estadoLabel(estado: string): string {

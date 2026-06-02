@@ -1,10 +1,10 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule, CurrencyPipe, DatePipe } from '@angular/common';
 import { RouterLink, ActivatedRoute, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import {
   IonHeader, IonToolbar, IonTitle, IonContent,
-  IonButton, IonIcon, IonButtons, IonSkeletonText
+  IonButton, IonIcon, IonButtons
 } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
 import {
@@ -23,14 +23,10 @@ import { FacturaService } from '../../services/factura';
   imports: [
     CommonModule, RouterLink, FormsModule, CurrencyPipe, DatePipe,
     IonHeader, IonToolbar, IonTitle, IonContent,
-    IonButton, IonIcon, IonButtons, IonSkeletonText
+    IonButton, IonIcon, IonButtons
   ],
 })
 export class DetallePage implements OnInit {
-
-  private route          = inject(ActivatedRoute);
-  private router         = inject(Router);
-  private facturaService = inject(FacturaService);
 
   factura: any     = null;
   items: any[]     = [];
@@ -43,7 +39,11 @@ export class DetallePage implements OnInit {
   formaPago        = 'Transferencia';
   hoy              = new Date().toISOString().split('T')[0];
 
-  constructor() {
+  constructor(
+    private route: ActivatedRoute,
+    private router: Router,
+    private facturaService: FacturaService
+  ) {
     addIcons({
       arrowBackOutline, shareOutline, listOutline, receiptOutline,
       shieldCheckmarkOutline, checkmarkCircleOutline, closeCircleOutline,

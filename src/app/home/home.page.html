@@ -1,157 +1,170 @@
 <ion-header class="ion-no-border">
   <ion-toolbar>
-    <div class="toolbar-inner">
-      <div class="logo-group">
-        <span class="logo-pill">SB</span>
-        <span class="logo-name">SmartBusiness</span>
-      </div>
-      <button class="icon-btn" routerLink="/upload">
-        <ion-icon name="add-circle" class="add-icon"></ion-icon>
-      </button>
-    </div>
+    <ion-title class="app-title">
+      <span class="logo-sb">SB</span>
+      SmartBusiness
+    </ion-title>
+    <ion-buttons slot="end">
+      <span class="env-badge">DEV</span>
+    </ion-buttons>
   </ion-toolbar>
 </ion-header>
 
 <ion-content class="home-content">
 
-  <!-- Greeting -->
-  <div class="greeting">
-    <p class="greeting__date">{{ hoy | date:'EEEE, d MMMM':'':'es' }}</p>
-    <h1 class="greeting__title">Resumen financiero</h1>
+  <!-- Header info -->
+  <div class="dev-header">
+    <p class="dev-label">Panel de desarrollo</p>
+    <h1 class="dev-title">SmartBusiness<br><span class="accent">OCR Suite</span></h1>
+    <p class="dev-sub">Selecciona una pantalla para revisar avances</p>
   </div>
 
-  <!-- ── KPI hero card ─────────────────────────────── -->
-  <div class="hero-card sb-card">
-    <p class="hero-card__label">Total por cobrar</p>
-    @if (cargando) {
-      <ion-skeleton-text animated class="skel-amount"></ion-skeleton-text>
-    } @else {
-      <p class="hero-card__amount">
-        {{ totalPendiente | currency:'COP':'symbol-narrow':'1.0-0':'es-CO' }}
-      </p>
-    }
-    <div class="hero-card__row">
-      <div class="hero-card__stat">
-        <ion-icon name="alert-circle-outline" class="stat-icon warn"></ion-icon>
-        @if (cargando) {
-          <ion-skeleton-text animated style="width:40px;height:12px;border-radius:4px"></ion-skeleton-text>
-        } @else {
-          <span class="stat-val warn">{{ cantPendientes }} pendientes</span>
-        }
+  <!-- Sección: Flujo principal -->
+  <div class="section">
+    <p class="section-label">🔄 Flujo principal</p>
+
+    <div class="nav-card" routerLink="/onboarding">
+      <div class="nc-left">
+        <div class="nc-icon green">⚙️</div>
+        <div class="nc-info">
+          <p class="nc-title">Onboarding</p>
+          <p class="nc-sub">Configuración inicial de la PyME</p>
+        </div>
       </div>
-      <div class="hero-card__stat">
-        <ion-icon name="checkmark-circle-outline" class="stat-icon ok"></ion-icon>
-        @if (cargando) {
-          <ion-skeleton-text animated style="width:40px;height:12px;border-radius:4px"></ion-skeleton-text>
-        } @else {
-          <span class="stat-val ok">{{ totalPagado | currency:'COP':'symbol-narrow':'1.0-0':'es-CO' }} cobrado</span>
-        }
+      <div class="nc-right">
+        <span class="nc-status done">Listo</span>
+        <span class="nc-arrow">›</span>
       </div>
     </div>
-  </div>
 
-  <!-- ── Stats chips ────────────────────────────────── -->
-  <div class="stats-row">
-    <div class="stat-chip sb-card">
-      <ion-icon name="receipt-outline" class="chip-icon"></ion-icon>
-      @if (cargando) {
-        <ion-skeleton-text animated class="skel-stat"></ion-skeleton-text>
-      } @else {
-        <p class="chip-val">{{ totalFacturas }}</p>
-      }
-      <p class="chip-label">Documentos</p>
-    </div>
-
-    <div class="stat-chip sb-card">
-      <ion-icon name="time-outline" class="chip-icon warn"></ion-icon>
-      @if (cargando) {
-        <ion-skeleton-text animated class="skel-stat"></ion-skeleton-text>
-      } @else {
-        <p class="chip-val warn">{{ cantPendientes }}</p>
-      }
-      <p class="chip-label">Pendientes</p>
-    </div>
-
-    <div class="stat-chip sb-card">
-      <ion-icon name="trending-up-outline" class="chip-icon ok"></ion-icon>
-      @if (cargando) {
-        <ion-skeleton-text animated class="skel-stat"></ion-skeleton-text>
-      } @else {
-        <p class="chip-val ok">{{ totalFacturas - cantPendientes }}</p>
-      }
-      <p class="chip-label">Pagadas</p>
-    </div>
-  </div>
-
-  <!-- ── CTA principal ──────────────────────────────── -->
-  <div class="cta-wrap">
-    <button class="sb-btn-primary cta-btn" routerLink="/upload">
-      <ion-icon name="add-circle" class="cta-icon"></ion-icon>
-      Procesar factura
-    </button>
-  </div>
-
-  <!-- ── Últimas facturas ───────────────────────────── -->
-  <div class="section-header">
-    <p class="sb-section-label">Últimas facturas</p>
-    <button class="ver-todas-btn" routerLink="/facturas">
-      Ver todas
-      <ion-icon name="chevron-forward-outline"></ion-icon>
-    </button>
-  </div>
-
-  <!-- Skeletons de carga -->
-  @if (cargando) {
-    <div class="facturas-list">
-      @for (s of [1,2,3]; track s) {
-        <div class="sb-card factura-row">
-          <div class="fr-left">
-            <ion-skeleton-text animated style="width:90px;height:13px;border-radius:4px"></ion-skeleton-text>
-            <ion-skeleton-text animated style="width:160px;height:16px;margin-top:6px;border-radius:4px"></ion-skeleton-text>
-            <ion-skeleton-text animated style="width:70px;height:11px;margin-top:6px;border-radius:4px"></ion-skeleton-text>
-          </div>
-          <div class="fr-right">
-            <ion-skeleton-text animated style="width:60px;height:20px;border-radius:4px"></ion-skeleton-text>
-            <ion-skeleton-text animated style="width:55px;height:18px;margin-top:8px;border-radius:6px"></ion-skeleton-text>
-          </div>
+    <div class="nav-card" routerLink="/upload">
+      <div class="nc-left">
+        <div class="nc-icon blue">📄</div>
+        <div class="nc-info">
+          <p class="nc-title">Subir Factura</p>
+          <p class="nc-sub">XML, PDF, Imagen, ZIP</p>
         </div>
-      }
+      </div>
+      <div class="nc-right">
+        <span class="nc-status done">Listo</span>
+        <span class="nc-arrow">›</span>
+      </div>
     </div>
-  }
 
-  <!-- Lista real -->
-  @if (!cargando && ultimasFacturas.length > 0) {
-    <div class="facturas-list">
-      @for (f of ultimasFacturas; track f.id) {
-        <div class="sb-card factura-row" (click)="irADetalle(f.id)">
-          <div class="fr-left">
-            <span class="fr-numero">{{ numeroFactura(f) }}</span>
-            <p class="fr-proveedor">{{ f.proveedor_nombre || 'Sin proveedor' }}</p>
-            <span class="fr-fecha">{{ f.fecha_emision | date:'d MMM yyyy':'':'es' }}</span>
-          </div>
-          <div class="fr-right">
-            <span class="fr-monto">
-              {{ f.total_pagar | currency:'COP':'symbol-narrow':'1.0-0':'es-CO' }}
-            </span>
-            <span class="sb-badge sb-badge--{{ estadoClass(f.estado) }}">
-              {{ estadoLabel(f.estado) }}
-            </span>
-          </div>
+    <div class="nav-card" routerLink="/facturas">
+      <div class="nc-left">
+        <div class="nc-icon purple">🗂️</div>
+        <div class="nc-info">
+          <p class="nc-title">Mis Facturas</p>
+          <p class="nc-sub">Lista, filtros y búsqueda</p>
         </div>
-      }
+      </div>
+      <div class="nc-right">
+        <span class="nc-status done">Listo</span>
+        <span class="nc-arrow">›</span>
+      </div>
     </div>
-  }
 
-  <!-- Estado vacío -->
-  @if (!cargando && ultimasFacturas.length === 0) {
-    <div class="sb-empty-state">
-      <ion-icon name="document-text-outline"></ion-icon>
-      <p class="sb-empty-state__title">Sin facturas aún</p>
-      <p class="sb-empty-state__sub">Sube tu primer documento para comenzar</p>
-      <button class="sb-btn-primary" routerLink="/upload">Procesar primera factura</button>
+    <div class="nav-card disabled">
+      <div class="nc-left">
+        <div class="nc-icon gray">📊</div>
+        <div class="nc-info">
+          <p class="nc-title">Dashboard</p>
+          <p class="nc-sub">Analíticas y resumen</p>
+        </div>
+      </div>
+      <div class="nc-right">
+        <span class="nc-status pending">Pendiente</span>
+      </div>
     </div>
-  }
 
-  <div style="height: 40px"></div>
+  </div>
+
+  <!-- Sección: Infraestructura -->
+  <div class="section">
+    <p class="section-label">☁️ Infraestructura</p>
+
+    <div class="info-row">
+      <span class="ir-label">Worker OCR</span>
+      <span class="ir-value green">http://34.26.53.228:30080</span>
+    </div>
+    <div class="info-row">
+      <span class="ir-label">n8n</span>
+      <span class="ir-value green">smartbusinessdam.sytes.net</span>
+    </div>
+    <div class="info-row">
+      <span class="ir-label">Supabase</span>
+      <span class="ir-value green">zsoynenfjwme...supabase.co</span>
+    </div>
+    <div class="info-row">
+      <span class="ir-label">Kubernetes</span>
+      <span class="ir-value yellow">minikube (dev)</span>
+    </div>
+  </div>
+
+  <!-- Sección: Estado del proyecto -->
+  <div class="section">
+    <p class="section-label">📋 Estado del proyecto</p>
+
+    <div class="progress-item">
+      <div class="pi-header">
+        <span class="pi-label">Capa 1 — Extracción OCR</span>
+        <span class="pi-pct">75%</span>
+      </div>
+      <div class="pi-bar"><div class="pi-fill" style="width:75%; background:#00D68F"></div></div>
+    </div>
+
+    <div class="progress-item">
+      <div class="pi-header">
+        <span class="pi-label">Capa 2 — Almacenamiento</span>
+        <span class="pi-pct">60%</span>
+      </div>
+      <div class="pi-bar"><div class="pi-fill" style="width:60%; background:#5382FF"></div></div>
+    </div>
+
+    <div class="progress-item">
+      <div class="pi-header">
+        <span class="pi-label">Capa 3 — Analíticas</span>
+        <span class="pi-pct">10%</span>
+      </div>
+      <div class="pi-bar"><div class="pi-fill" style="width:10%; background:#FFB142"></div></div>
+    </div>
+
+    <div class="progress-item">
+      <div class="pi-header">
+        <span class="pi-label">App Ionic</span>
+        <span class="pi-pct">50%</span>
+      </div>
+      <div class="pi-bar"><div class="pi-fill" style="width:50%; background:#FF4757"></div></div>
+    </div>
+  </div>
+
+  <!-- Sección: Equipo -->
+  <div class="section">
+    <p class="section-label">👥 Equipo</p>
+    <div class="team-row">
+      <div class="team-card">
+        <div class="tc-avatar" style="background:#00D68F22; color:#00D68F">E</div>
+        <p class="tc-name">Erik</p>
+        <p class="tc-role">Frontend / OCR</p>
+      </div>
+      <div class="team-card">
+        <div class="tc-avatar" style="background:#5382FF22; color:#5382FF">S</div>
+        <p class="tc-name">Samuel</p>
+        <p class="tc-role">Arquitectura</p>
+      </div>
+      <div class="team-card">
+        <div class="tc-avatar" style="background:#FFB14222; color:#FFB142">J</div>
+        <p class="tc-name">Juan Pablo</p>
+        <p class="tc-role">Kubernetes</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <div class="dev-footer">
+    <p>ETITC · DAM · 2026</p>
+    <p>Rama: <span class="accent">erik/desarrollo</span></p>
+  </div>
 
 </ion-content>

@@ -1,29 +1,46 @@
+:host {
+  --primary:   #00D68F;
+  --surface:   #111318;
+  --surface-2: #1A1D24;
+  --surface-3: #22262F;
+  --border:    rgba(255,255,255,0.08);
+  --text-1:    #F0F2F5;
+  --text-2:    #8B919E;
+  --text-3:    #555B67;
+  --danger:    #FF4757;
+  --warn:      #FFB142;
+  --radius:    14px;
+  --radius-sm: 10px;
+}
+
 ion-toolbar {
-  --background:   var(--sb-bg-primary);
+  --background:   var(--surface);
   --border-width: 0;
   padding: 4px 8px;
 }
 
 .app-title {
-  --color: var(--sb-text-primary);
-  font-weight: var(--sb-font-bold);
+  --color: var(--text-1);
+  font-weight: 700;
   font-size: 17px;
+  letter-spacing: -0.3px;
 }
 
-.nav-btn { --color: var(--sb-text-secondary); }
+.nav-btn { --color: var(--text-2); }
 
 .facturas-content {
-  --background:     var(--sb-bg-primary);
+  --background:     var(--surface);
   --padding-bottom: 80px;
 }
 
-// ── Summary strip ─────────────────────────────────────────────────
+// ── Summary ───────────────────────────────────────────────────────
 .summary-strip {
   display: flex;
   align-items: center;
-  background: var(--sb-bg-card);
-  border-bottom: 1px solid var(--sb-border-subtle);
-  padding: var(--sb-space-md);
+  background: var(--surface-2);
+  border-bottom: 1px solid var(--border);
+  padding: 16px 20px;
+  gap: 0;
 }
 
 .summary-item {
@@ -37,45 +54,33 @@ ion-toolbar {
 .summary-divider {
   width: 1px;
   height: 32px;
-  background: var(--sb-border-subtle);
+  background: var(--border);
 }
 
 .si-value {
-  font-size: var(--sb-text-lg);
-  font-weight: var(--sb-font-bold);
-  color: var(--sb-text-primary);
+  font-size: 18px;
+  font-weight: 800;
+  color: var(--text-1);
   letter-spacing: -0.5px;
 
-  &.warn   { color: var(--sb-warning); }
-  &.ok     { color: var(--sb-success); }
-  &.danger { font-size: var(--sb-text-sm); color: var(--sb-danger); }
+  &.pending { color: var(--warn); }
+  &.paid    { color: var(--primary); }
+  &.amount  { font-size: 14px; color: var(--danger); }
 }
 
 .si-label {
-  font-size: var(--sb-text-xs);
-  font-weight: var(--sb-font-semibold);
-  color: var(--sb-text-secondary);
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--text-3);
   text-transform: uppercase;
   letter-spacing: 0.5px;
-}
-
-.skel-val {
-  width: 28px;
-  height: 20px;
-  border-radius: var(--sb-radius-sm);
-}
-
-.skel-amount {
-  width: 55px;
-  height: 16px;
-  border-radius: var(--sb-radius-sm);
 }
 
 // ── Filtros ───────────────────────────────────────────────────────
 .filter-bar {
   display: flex;
-  gap: var(--sb-space-sm);
-  padding: var(--sb-space-md) var(--sb-space-md) 0;
+  gap: 8px;
+  padding: 16px 20px 0;
   overflow-x: auto;
   scrollbar-width: none;
 
@@ -84,20 +89,19 @@ ion-toolbar {
 
 .filter-btn {
   flex-shrink: 0;
-  background: var(--sb-bg-card);
-  border: 1px solid var(--sb-border-subtle);
-  border-radius: var(--sb-radius-full);
-  padding: 7px var(--sb-space-md);
-  font-size: var(--sb-text-sm);
-  font-weight: var(--sb-font-semibold);
-  color: var(--sb-text-secondary);
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 7px 16px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-2);
   cursor: pointer;
-  transition: all var(--sb-transition-fast);
-  font-family: var(--sb-font-family);
+  transition: all 0.2s;
 
   &.active {
-    background: var(--sb-accent);
-    border-color: var(--sb-accent);
+    background: var(--primary);
+    border-color: var(--primary);
     color: #000;
   }
 }
@@ -107,15 +111,15 @@ ion-toolbar {
   display: flex;
   align-items: center;
   gap: 10px;
-  margin: var(--sb-space-sm) var(--sb-space-md) 0;
-  background: var(--sb-bg-card);
-  border: 1px solid var(--sb-border-subtle);
-  border-radius: var(--sb-radius-md);
-  padding: 10px var(--sb-space-md);
+  margin: 12px 20px 0;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 10px 14px;
 
   ion-icon {
     font-size: 16px;
-    color: var(--sb-muted);
+    color: var(--text-3);
     flex-shrink: 0;
   }
 
@@ -124,11 +128,10 @@ ion-toolbar {
     background: transparent;
     border: none;
     outline: none;
-    font-size: var(--sb-text-sm);
-    color: var(--sb-text-primary);
-    font-family: var(--sb-font-family);
+    font-size: 14px;
+    color: var(--text-1);
 
-    &::placeholder { color: var(--sb-muted); }
+    &::placeholder { color: var(--text-3); }
   }
 
   button {
@@ -136,78 +139,161 @@ ion-toolbar {
     border: none;
     cursor: pointer;
     padding: 0;
-    display: flex;
 
-    ion-icon { font-size: 16px; color: var(--sb-muted); }
+    ion-icon { font-size: 16px; color: var(--text-3); }
+  }
+}
+
+// ── Loading ───────────────────────────────────────────────────────
+.loading-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  padding: 60px 20px;
+
+  .loading-ring {
+    width: 40px;
+    height: 40px;
+    border: 3px solid var(--surface-3);
+    border-top-color: var(--primary);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+
+  p {
+    font-size: 14px;
+    color: var(--text-2);
+    margin: 0;
+  }
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+// ── Empty state ───────────────────────────────────────────────────
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 60px 40px;
+  text-align: center;
+
+  ion-icon {
+    font-size: 48px;
+    color: var(--text-3);
+  }
+
+  h3 {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--text-1);
+    margin: 0;
+  }
+
+  p {
+    font-size: 14px;
+    color: var(--text-2);
+    margin: 0;
+    line-height: 1.5;
+  }
+
+  .empty-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--primary);
+    border: none;
+    border-radius: var(--radius-sm);
+    padding: 12px 20px;
+    font-size: 14px;
+    font-weight: 700;
+    color: #000;
+    cursor: pointer;
+    margin-top: 8px;
+
+    ion-icon { font-size: 16px; }
   }
 }
 
 // ── Lista ─────────────────────────────────────────────────────────
 .facturas-list {
-  padding: var(--sb-space-sm) var(--sb-space-md) 0;
+  padding: 16px 20px 0;
   display: flex;
   flex-direction: column;
-  gap: var(--sb-space-sm);
+  gap: 10px;
 }
 
 .factura-card {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px;
   cursor: pointer;
-  transition: border-color var(--sb-transition-fast), transform var(--sb-transition-fast);
+  transition: all 0.2s;
 
   &:active {
     transform: scale(0.99);
-    border-color: rgba(0, 214, 143, 0.25);
+    border-color: rgba(0,214,143,0.2);
   }
 }
 
 .fc-left {
   display: flex;
   align-items: center;
-  gap: var(--sb-space-sm);
+  gap: 12px;
   min-width: 0;
   flex: 1;
 }
 
-// Indicador de estado circular
-.fc-dot-wrap {
+.fc-estado {
   width: 36px;
   height: 36px;
-  border-radius: var(--sb-radius-md);
+  border-radius: 10px;
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
 
-  .fc-dot {
+  .estado-dot {
     width: 10px;
     height: 10px;
     border-radius: 50%;
   }
 
-  &.pendiente  { background: var(--sb-warning-dim); .fc-dot { background: var(--sb-warning); } }
-  &.pagada     { background: var(--sb-success-dim); .fc-dot { background: var(--sb-success); } }
-  &.procesada  { background: var(--sb-info-dim);    .fc-dot { background: var(--sb-info);    } }
-  &.vencida    { background: var(--sb-danger-dim);  .fc-dot { background: var(--sb-danger);  } }
-}
+  &.pendiente {
+    background: rgba(255,177,66,0.15);
+    .estado-dot { background: var(--warn); }
+  }
 
-.fc-dot-skel {
-  width: 36px;
-  height: 36px;
-  border-radius: var(--sb-radius-md);
-  background: var(--sb-bg-overlay);
-  flex-shrink: 0;
+  &.pagada {
+    background: rgba(0,214,143,0.15);
+    .estado-dot { background: var(--primary); }
+  }
+
+  &.procesada {
+    background: rgba(83,130,255,0.15);
+    .estado-dot { background: #5382FF; }
+  }
+
+  &.vencida {
+    background: rgba(255,71,87,0.15);
+    .estado-dot { background: var(--danger); }
+  }
 }
 
 .fc-info {
   min-width: 0;
 
   .fc-numero {
-    font-size: var(--sb-text-sm);
-    font-weight: var(--sb-font-bold);
-    color: var(--sb-text-primary);
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text-1);
     margin: 0 0 2px;
     white-space: nowrap;
     overflow: hidden;
@@ -215,8 +301,8 @@ ion-toolbar {
   }
 
   .fc-proveedor {
-    font-size: var(--sb-text-xs);
-    color: var(--sb-text-secondary);
+    font-size: 12px;
+    color: var(--text-2);
     margin: 0 0 2px;
     white-space: nowrap;
     overflow: hidden;
@@ -225,8 +311,8 @@ ion-toolbar {
   }
 
   .fc-fecha {
-    font-size: var(--sb-text-xs);
-    color: var(--sb-muted);
+    font-size: 11px;
+    color: var(--text-3);
     margin: 0;
   }
 }
@@ -237,27 +323,37 @@ ion-toolbar {
   align-items: flex-end;
   gap: 4px;
   flex-shrink: 0;
-  margin-left: var(--sb-space-sm);
 
   .fc-total {
-    font-size: var(--sb-text-base);
-    font-weight: var(--sb-font-bold);
-    color: var(--sb-text-primary);
+    font-size: 15px;
+    font-weight: 800;
+    color: var(--text-1);
     margin: 0;
-    white-space: nowrap;
+    letter-spacing: -0.3px;
+  }
+
+  .fc-badge {
+    font-size: 10px;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: 4px;
+    letter-spacing: 0.3px;
+    text-transform: uppercase;
+
+    &.pendiente { background: rgba(255,177,66,0.15); color: var(--warn); }
+    &.pagada    { background: rgba(0,214,143,0.15);  color: var(--primary); }
+    &.procesada { background: rgba(83,130,255,0.15); color: #5382FF; }
+    &.vencida   { background: rgba(255,71,87,0.15);  color: var(--danger); }
   }
 
   .fc-vence {
-    font-size: var(--sb-text-xs);
-    color: var(--sb-danger);
+    font-size: 10px;
+    color: var(--danger);
     margin: 0;
   }
 }
 
-// ── FAB ───────────────────────────────────────────────────────────
 ion-fab-button {
-  --background:       var(--sb-accent);
-  --background-hover: var(--sb-accent-dark);
-  --color:            #000;
-  --box-shadow:       var(--sb-shadow-accent);
+  --background: var(--primary);
+  --color: #000;
 }
