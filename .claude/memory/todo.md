@@ -24,6 +24,31 @@
 - [ ] **UI onboarding** — progreso 7 pasos, transiciones suaves
 - [ ] **UX nav** — fix back-arrows, auditoría ion-back-button
 
+## Fase 1.5 — Inteligencia de presentación
+
+### Navegación contextual (lote)
+- [ ] **Nav-A** — `SesionCargaService`: signal de lote actual, iniciarLote/agregarAFLote
+- [ ] **Nav-B** — upload.page: llamar al servicio, pasar `?from=lote` al navegar a detalle
+- [ ] **Nav-C** — detalle.page: leer queryParam `from`, ajustar destino del back-button
+
+### Lista de facturas inteligente
+- [ ] **List-A** — Agrupación por mes | proveedor | sin agrupar (Signals + computed)
+- [ ] **List-B** — Ordenamiento dentro del grupo (fecha asc/desc, monto asc/desc)
+- [ ] **List-C** — Filtros: estado + rango de fechas + búsqueda libre
+- [ ] **List-D** — Sticky headers al agrupar
+- [ ] **List-E** — Resumen global (tarjeta top) con totales y mini-stats
+- [ ] **List-F** — Filtro de lote: `?lote=id` → chip "Lote: N facturas" + salir
+
+### Revisar lote (upload.page)
+- [ ] **Lote-A** — Sección "Revisar las N facturas cargadas" en modo masiva
+- [ ] **Lote-B** — Navegación al lote en facturas.page
+
+### Skeleton components
+- [ ] **Skel-A** — `SbSkeletonComponent` standalone (variantes: card, row, block)
+- [ ] **Skel-B** — Shimmer animation con tokens del sistema
+- [ ] **Skel-C** — Aplicar en facturas.page (loading inicial)
+- [ ] **Skel-D** — Aplicar en detalle.page (loading de factura)
+
 ## Fase 2 — n8n + Telegram
 - [ ] **D2** — n8n router completo (webhook detecta formato, enruta)
 - [ ] **D5** — Cola de procesamiento en n8n

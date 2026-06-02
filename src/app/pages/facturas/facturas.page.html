@@ -1,13 +1,10 @@
 <ion-header class="ion-no-border">
   <ion-toolbar>
     <ion-buttons slot="start">
-      <ion-button routerLink="/upload" class="nav-btn">
-        <ion-icon name="arrow-back-outline" slot="icon-only"></ion-icon>
-      </ion-button>
+      <ion-back-button defaultHref="/home" text="" class="back-btn"></ion-back-button>
     </ion-buttons>
-    <ion-title class="app-title">Mis Facturas</ion-title>
     <ion-buttons slot="end">
-      <ion-button (click)="cargarFacturas()" class="nav-btn">
+      <ion-button (click)="cargarFacturas()" fill="clear" class="nav-btn">
         <ion-icon name="refresh-outline" slot="icon-only"></ion-icon>
       </ion-button>
     </ion-buttons>
@@ -16,105 +13,225 @@
 
 <ion-content class="facturas-content">
 
-  <!-- Resumen -->
-  <div class="summary-strip">
-    <div class="summary-item">
-      <span class="si-value">{{ totalFacturas }}</span>
-      <span class="si-label">Total</span>
+  <!-- ── Lote chip ──────────────────────────────────────────────────────── -->
+  @if (filtroLote()) {
+    <div class="lote-chip">
+      <ion-icon name="list-outline"></ion-icon>
+      <span>Lote · {{ resumen().total }} facturas</span>
+      <button class="lote-chip__close" (click)="salirDeLote()">
+        <ion-icon name="close-outline"></ion-icon>
+        Salir del lote
+      </button>
     </div>
-    <div class="summary-divider"></div>
-    <div class="summary-item">
-      <span class="si-value pending">{{ totalPendientes }}</span>
-      <span class="si-label">Pendientes</span>
+  }
+
+  <!-- ── Hero ───────────────────────────────────────────────────────────── -->
+  <div class="page-hero">
+    <h1 class="page-title">Mis facturas</h1>
+  </div>
+
+  <!-- ── Resumen card ───────────────────────────────────────────────────── -->
+  <div class="resumen-card">
+    <div class="resumen-item">
+      <span class="ri-val">{{ resumen().total }}</span>
+      <span class="ri-label">Total</span>
     </div>
-    <div class="summary-divider"></div>
-    <div class="summary-item">
-      <span class="si-value paid">{{ totalPagadas }}</span>
-      <span class="si-label">Pagadas</span>
+    <div class="resumen-div"></div>
+    <div class="resumen-item">
+      <span class="ri-val ri-val--warn">{{ resumen().pendientes }}</span>
+      <span class="ri-label">Pendientes</span>
     </div>
-    <div class="summary-divider"></div>
-    <div class="summary-item">
-      <span class="si-value amount">{{ montoPendiente | currency:'COP':'$':'1.0-0' }}</span>
-      <span class="si-label">Por pagar</span>
+    <div class="resumen-div"></div>
+    <div class="resumen-item">
+      <span class="ri-val ri-val--ok">{{ resumen().pagadas }}</span>
+      <span class="ri-label">Pagadas</span>
+    </div>
+    <div class="resumen-div"></div>
+    <div class="resumen-item">
+      <span class="ri-val ri-val--danger">{{ resumen().vencidas }}</span>
+      <span class="ri-label">Vencidas</span>
     </div>
   </div>
 
-  <!-- Filtros -->
-  <div class="filter-bar">
-    <button class="filter-btn" [class.active]="filtroActivo === 'todos'"
-      (click)="setFiltro('todos')">Todos</button>
-    <button class="filter-btn" [class.active]="filtroActivo === 'pendiente'"
-      (click)="setFiltro('pendiente')">Pendientes</button>
-    <button class="filter-btn" [class.active]="filtroActivo === 'pagada'"
-      (click)="setFiltro('pagada')">Pagadas</button>
-    <button class="filter-btn" [class.active]="filtroActivo === 'vencida'"
-      (click)="setFiltro('vencida')">Vencidas</button>
-  </div>
+  <!-- ── Monto pendiente ────────────────────────────────────────────────── -->
+  @if (resumen().montoPendiente > 0) {
+    <div class="monto-pendiente">
+      <span class="mp-label">Por pagar</span>
+      <span class="mp-val">{{ resumen().montoPendiente | currency:'COP':'$':'1.0-0' }}</span>
+    </div>
+  }
 
-  <!-- Búsqueda -->
+  <!-- ── Búsqueda ───────────────────────────────────────────────────────── -->
   <div class="search-bar">
-    <ion-icon name="search-outline"></ion-icon>
-    <input type="text" placeholder="Buscar por proveedor, número..."
-      [(ngModel)]="busqueda" (input)="filtrarLocal()">
-    <button *ngIf="busqueda" (click)="busqueda=''; filtrarLocal()">
-      <ion-icon name="close-outline"></ion-icon>
-    </button>
+    <ion-icon name="search-outline" class="search-bar__icon"></ion-icon>
+    <input
+      type="text"
+      placeholder="Buscar por proveedor, número..."
+      [value]="busqueda()"
+      (input)="setBusqueda($any($event.target).value)"
+      class="search-bar__input"
+    />
+    @if (busqueda()) {
+      <button class="search-bar__clear" (click)="setBusqueda('')">
+        <ion-icon name="close-outline"></ion-icon>
+      </button>
+    }
   </div>
 
-  <!-- Loading -->
-  <div class="loading-state" *ngIf="cargando">
-    <div class="loading-ring"></div>
-    <p>Cargando facturas...</p>
+  <!-- ── Chips de estado ────────────────────────────────────────────────── -->
+  <div class="filter-chips">
+    <button class="chip"
+      [class.chip--active]="filtroEstado() === 'todos'"
+      (click)="setFiltroEstado('todos')">Todos</button>
+    <button class="chip"
+      [class.chip--active]="filtroEstado() === 'pendiente'"
+      (click)="setFiltroEstado('pendiente')">Pendientes</button>
+    <button class="chip"
+      [class.chip--active]="filtroEstado() === 'pagada'"
+      (click)="setFiltroEstado('pagada')">Pagadas</button>
+    <button class="chip"
+      [class.chip--active]="filtroEstado() === 'vencida'"
+      (click)="setFiltroEstado('vencida')">Vencidas</button>
   </div>
 
-  <!-- Empty state -->
-  <div class="empty-state" *ngIf="!cargando && facturasFiltradas.length === 0">
-    <ion-icon name="document-text-outline"></ion-icon>
-    <h3>Sin facturas</h3>
-    <p>{{ busqueda ? 'No hay resultados para tu búsqueda' : 'Sube tu primera factura para comenzar' }}</p>
-    <button class="empty-btn" routerLink="/upload">
-      <ion-icon name="add-outline"></ion-icon>
-      Subir factura
-    </button>
+  <!-- ── Chips de rango de fecha ────────────────────────────────────────── -->
+  <div class="filter-chips filter-chips--secondary">
+    <button class="chip chip--sm"
+      [class.chip--active]="rangoFecha() === 'todo'"
+      (click)="setRango('todo')">Todo</button>
+    <button class="chip chip--sm"
+      [class.chip--active]="rangoFecha() === 'mes'"
+      (click)="setRango('mes')">Este mes</button>
+    <button class="chip chip--sm"
+      [class.chip--active]="rangoFecha() === 'mes-ant'"
+      (click)="setRango('mes-ant')">Mes pasado</button>
+    <button class="chip chip--sm"
+      [class.chip--active]="rangoFecha() === '90d'"
+      (click)="setRango('90d')">90 días</button>
   </div>
 
-  <!-- Lista -->
-  <div class="facturas-list" *ngIf="!cargando && facturasFiltradas.length > 0">
-    <div class="factura-card"
-      *ngFor="let f of facturasFiltradas; trackBy: trackById"
-      (click)="verDetalle(f)">
-
-      <div class="fc-left">
-        <div class="fc-estado" [ngClass]="f.estado">
-          <span class="estado-dot"></span>
-        </div>
-        <div class="fc-info">
-          <p class="fc-numero">{{ f.numero || '—' }}</p>
-          <p class="fc-proveedor">{{ f.proveedor_nombre || '—' }}</p>
-          <p class="fc-fecha">
-            {{ f.fecha_emision ? (f.fecha_emision | date:'dd MMM yyyy') : '—' }}
-          </p>
-        </div>
-      </div>
-
-      <div class="fc-right">
-        <p class="fc-total">{{ (f.total_pagar || 0) | currency:'COP':'$':'1.0-0' }}</p>
-        <span class="fc-badge" [ngClass]="f.estado">
-          {{ estadoLabel(f.estado) }}
-        </span>
-        <p class="fc-vence" *ngIf="f.fecha_vencimiento">
-          Vence {{ f.fecha_vencimiento | date:'dd MMM' }}
-        </p>
-      </div>
-
+  <!-- ── Controls: agrupación + orden ──────────────────────────────────── -->
+  <div class="controls-bar">
+    <div class="controls-bar__group">
+      <span class="controls-bar__label">Agrupar</span>
+      <select
+        class="controls-select"
+        [value]="agrupacion()"
+        (change)="setAgrupacion($any($event.target).value)">
+        <option value="mes">Por mes</option>
+        <option value="proveedor">Por proveedor</option>
+        <option value="flat">Sin agrupar</option>
+      </select>
+    </div>
+    <div class="controls-bar__group">
+      <span class="controls-bar__label">Ordenar</span>
+      <select
+        class="controls-select"
+        [value]="orden()"
+        (change)="setOrden($any($event.target).value)">
+        <option value="fecha-desc">Más reciente</option>
+        <option value="fecha-asc">Más antiguo</option>
+        <option value="monto-desc">Mayor monto</option>
+        <option value="monto-asc">Menor monto</option>
+      </select>
     </div>
   </div>
+
+  <!-- ── Skeleton loading ───────────────────────────────────────────────── -->
+  @if (cargando()) {
+    <div class="skeleton-list">
+      @for (i of skeletonItems; track i) {
+        <div class="sk-card">
+          <div class="sk-left">
+            <div class="sk-dot"></div>
+            <div class="sk-info">
+              <div class="sk-line sk-line--wide"></div>
+              <div class="sk-line sk-line--narrow"></div>
+              <div class="sk-line sk-line--xs"></div>
+            </div>
+          </div>
+          <div class="sk-right">
+            <div class="sk-line sk-line--medium"></div>
+            <div class="sk-badge"></div>
+          </div>
+        </div>
+      }
+    </div>
+  }
+
+  <!-- ── Empty state ────────────────────────────────────────────────────── -->
+  @if (!cargando() && facturasFiltradas().length === 0) {
+    <div class="empty-state">
+      <ion-icon name="document-text-outline" class="empty-state__icon"></ion-icon>
+      @if (facturasOriginales().length === 0) {
+        <p class="empty-state__title">Sin facturas aún</p>
+        <p class="empty-state__sub">Sube tu primera factura para comenzar</p>
+        <button class="sb-btn-primary" (click)="goToUpload()">
+          <ion-icon name="add-outline"></ion-icon>
+          Cargar primera factura
+        </button>
+      } @else {
+        <p class="empty-state__title">Sin resultados</p>
+        <p class="empty-state__sub">Prueba con otros filtros o búsqueda</p>
+        <button class="sb-btn-ghost" (click)="clearFiltros()">
+          Limpiar filtros
+        </button>
+      }
+    </div>
+  }
+
+  <!-- ── Lista agrupada ─────────────────────────────────────────────────── -->
+  @if (!cargando() && facturasFiltradas().length > 0) {
+    @for (grupo of grupos(); track grupo.clave; let isFirst = $first) {
+
+      <!-- Group header (skip for flat mode) -->
+      @if (agrupacion() !== 'flat') {
+        <div class="group-header" [class.group-header--first]="isFirst">
+          <div class="group-header__left">
+            <span class="group-header__titulo">{{ grupo.titulo }}</span>
+            <span class="group-header__sub">{{ grupo.subtitulo }}</span>
+          </div>
+        </div>
+      }
+
+      <!-- Cards -->
+      <div class="factura-list">
+        @for (f of grupo.facturas; track f.id) {
+          <div class="factura-card" (click)="verDetalle(f)">
+
+            <div class="fc-left">
+              <div class="fc-estado-dot" [class]="'fc-estado-dot--' + (f.estado ?? 'pendiente')"></div>
+              <div class="fc-info">
+                <p class="fc-numero">{{ f.numero || f.numero_factura || '—' }}</p>
+                <p class="fc-proveedor">{{ f.proveedor_nombre || '—' }}</p>
+                <p class="fc-fecha">
+                  {{ f.fecha_emision ? (f.fecha_emision | date:'d MMM yyyy':'':'es-CO') : '—' }}
+                </p>
+              </div>
+            </div>
+
+            <div class="fc-right">
+              <p class="fc-total">{{ (f.total_pagar ?? 0) | currency:'COP':'$':'1.0-0' }}</p>
+              <span class="fc-badge" [class]="'fc-badge--' + (f.estado ?? 'pendiente')">
+                {{ estadoLabel(f.estado) }}
+              </span>
+              @if (f.fecha_vencimiento && f.estado !== 'pagada') {
+                <p class="fc-vence">Vence {{ f.fecha_vencimiento | date:'d MMM':'':'es-CO' }}</p>
+              }
+            </div>
+
+            <ion-icon name="chevron-forward-outline" class="fc-chevron"></ion-icon>
+          </div>
+        }
+      </div>
+    }
+  }
 
 </ion-content>
 
 <!-- FAB -->
 <ion-fab vertical="bottom" horizontal="end" slot="fixed">
-  <ion-fab-button routerLink="/upload" color="success">
+  <ion-fab-button (click)="goToUpload()">
     <ion-icon name="add-outline"></ion-icon>
   </ion-fab-button>
 </ion-fab>

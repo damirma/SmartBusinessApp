@@ -36,6 +36,14 @@
 - Plugin frontend-design como referencia visual en cada rediseño
 **Consecuencias:** Mayor coherencia visual; fuentes cargadas de Google Fonts (requiere conexión en browser); próxima evolución hacia estética iPhone (cards más redondeadas, motion sutil)
 
+## ADR-009 — Navegación contextual (estado de origen) + presentación agrupada en lista de facturas (2026-06-02)
+**Contexto:** En uso real: al navegar de carga-masiva → detalle → back, el usuario volvía a /facturas (lista global), perdiendo el contexto del lote recién procesado. Además, 50+ facturas en lista plana son inmanejables — el usuario necesita agrupación por mes/proveedor, filtros y ordenamiento.
+**Decisión:**
+- Crear `SesionCargaService` con signal del lote actual (`iniciarLote`, `agregarAFLote`, `loteActual`). Upload.page llama al servicio cuando procesa; Detalle.page recibe `?from=lote` queryParam y ajusta su back-button destino.
+- Facturas.page adopta agrupación seleccionable (mes / proveedor / sin agrupar), ordenamiento dentro del grupo y filtros con chips. Todo via Signals + computed.
+- El lote como filtro especial en facturas.page: `?lote=loteId` muestra solo esas facturas con chip "Salir del lote".
+**Consecuencias:** SmartBusiness deja de ser un CRUD genérico y se convierte en un flujo orientado a tareas. La UX de "procesar un batch → revisar resultados → pagar" es coherente de punta a punta. Añade complejidad de estado, pero Angular Signals la hace manejable.
+
 ## ADR-006 — Angular Signals para estado de progreso batch (2026-06-02)
 **Contexto:** Estado reactivo del progreso de carga masiva
 **Decisión:** Usar Angular Signals (no BehaviorSubject) para el estado de ArchivoEnProceso[]

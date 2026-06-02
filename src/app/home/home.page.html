@@ -1,7 +1,7 @@
 <ion-header class="ion-no-border">
   <ion-toolbar>
     <ion-title class="app-title">
-      <span class="logo-sb">SB</span>
+      <span class="logo-mark">SB</span>
       SmartBusiness
     </ion-title>
     <ion-buttons slot="end">
@@ -12,159 +12,217 @@
 
 <ion-content class="home-content">
 
-  <!-- Header info -->
-  <div class="dev-header">
-    <p class="dev-label">Panel de desarrollo</p>
-    <h1 class="dev-title">SmartBusiness<br><span class="accent">OCR Suite</span></h1>
-    <p class="dev-sub">Selecciona una pantalla para revisar avances</p>
+  <!-- Hero -->
+  <div class="hero">
+    <p class="hero-eyebrow">
+      <ion-icon name="code-slash-outline"></ion-icon>
+      Panel de desarrollo
+    </p>
+    <h1 class="hero-title">OCR Suite<br><span class="hero-accent">SmartBusiness</span></h1>
+    <p class="hero-sub">Plataforma IDP para facturas electrónicas DIAN</p>
   </div>
 
-  <!-- Sección: Flujo principal -->
-  <div class="section">
-    <p class="section-label">🔄 Flujo principal</p>
-
-    <div class="nav-card" routerLink="/onboarding">
-      <div class="nc-left">
-        <div class="nc-icon green">⚙️</div>
-        <div class="nc-info">
-          <p class="nc-title">Onboarding</p>
-          <p class="nc-sub">Configuración inicial de la PyME</p>
-        </div>
-      </div>
-      <div class="nc-right">
-        <span class="nc-status done">Listo</span>
-        <span class="nc-arrow">›</span>
-      </div>
+  <!-- Stats rápidas -->
+  <div class="stat-grid">
+    <div class="stat-card">
+      <p class="stat-val">75%</p>
+      <p class="stat-label">OCR</p>
     </div>
-
-    <div class="nav-card" routerLink="/upload">
-      <div class="nc-left">
-        <div class="nc-icon blue">📄</div>
-        <div class="nc-info">
-          <p class="nc-title">Subir Factura</p>
-          <p class="nc-sub">XML, PDF, Imagen, ZIP</p>
-        </div>
-      </div>
-      <div class="nc-right">
-        <span class="nc-status done">Listo</span>
-        <span class="nc-arrow">›</span>
-      </div>
+    <div class="stat-card">
+      <p class="stat-val">60%</p>
+      <p class="stat-label">Storage</p>
     </div>
-
-    <div class="nav-card" routerLink="/facturas">
-      <div class="nc-left">
-        <div class="nc-icon purple">🗂️</div>
-        <div class="nc-info">
-          <p class="nc-title">Mis Facturas</p>
-          <p class="nc-sub">Lista, filtros y búsqueda</p>
-        </div>
-      </div>
-      <div class="nc-right">
-        <span class="nc-status done">Listo</span>
-        <span class="nc-arrow">›</span>
-      </div>
+    <div class="stat-card">
+      <p class="stat-val">3</p>
+      <p class="stat-label">Módulos</p>
     </div>
-
-    <div class="nav-card disabled">
-      <div class="nc-left">
-        <div class="nc-icon gray">📊</div>
-        <div class="nc-info">
-          <p class="nc-title">Dashboard</p>
-          <p class="nc-sub">Analíticas y resumen</p>
-        </div>
-      </div>
-      <div class="nc-right">
-        <span class="nc-status pending">Pendiente</span>
-      </div>
-    </div>
-
-  </div>
-
-  <!-- Sección: Infraestructura -->
-  <div class="section">
-    <p class="section-label">☁️ Infraestructura</p>
-
-    <div class="info-row">
-      <span class="ir-label">Worker OCR</span>
-      <span class="ir-value green">http://34.26.53.228:30080</span>
-    </div>
-    <div class="info-row">
-      <span class="ir-label">n8n</span>
-      <span class="ir-value green">smartbusinessdam.sytes.net</span>
-    </div>
-    <div class="info-row">
-      <span class="ir-label">Supabase</span>
-      <span class="ir-value green">zsoynenfjwme...supabase.co</span>
-    </div>
-    <div class="info-row">
-      <span class="ir-label">Kubernetes</span>
-      <span class="ir-value yellow">minikube (dev)</span>
+    <div class="stat-card stat-card--accent">
+      <p class="stat-val">✓</p>
+      <p class="stat-label">Online</p>
     </div>
   </div>
 
-  <!-- Sección: Estado del proyecto -->
+  <!-- Módulos -->
   <div class="section">
-    <p class="section-label">📋 Estado del proyecto</p>
+    <p class="section-label">
+      <ion-icon name="layers-outline"></ion-icon>
+      Módulos
+    </p>
 
-    <div class="progress-item">
-      <div class="pi-header">
-        <span class="pi-label">Capa 1 — Extracción OCR</span>
-        <span class="pi-pct">75%</span>
+    <a class="nav-card" routerLink="/onboarding">
+      <div class="nav-card__icon nav-card__icon--green">
+        <ion-icon name="layers-outline"></ion-icon>
       </div>
-      <div class="pi-bar"><div class="pi-fill" style="width:75%; background:#00D68F"></div></div>
-    </div>
+      <div class="nav-card__body">
+        <p class="nav-card__title">Onboarding</p>
+        <p class="nav-card__sub">Perfil de extracción · 7 pasos</p>
+      </div>
+      <div class="nav-card__end">
+        <span class="status-badge status-badge--ok">Listo</span>
+        <ion-icon name="chevron-forward-outline" class="nav-card__chevron"></ion-icon>
+      </div>
+    </a>
 
-    <div class="progress-item">
-      <div class="pi-header">
-        <span class="pi-label">Capa 2 — Almacenamiento</span>
-        <span class="pi-pct">60%</span>
+    <a class="nav-card" routerLink="/upload">
+      <div class="nav-card__icon nav-card__icon--blue">
+        <ion-icon name="cloud-upload-outline"></ion-icon>
       </div>
-      <div class="pi-bar"><div class="pi-fill" style="width:60%; background:#5382FF"></div></div>
-    </div>
+      <div class="nav-card__body">
+        <p class="nav-card__title">Cargar factura</p>
+        <p class="nav-card__sub">Individual · Masiva · XML · PDF · Imagen</p>
+      </div>
+      <div class="nav-card__end">
+        <span class="status-badge status-badge--ok">Listo</span>
+        <ion-icon name="chevron-forward-outline" class="nav-card__chevron"></ion-icon>
+      </div>
+    </a>
 
-    <div class="progress-item">
-      <div class="pi-header">
-        <span class="pi-label">Capa 3 — Analíticas</span>
-        <span class="pi-pct">10%</span>
+    <a class="nav-card" routerLink="/facturas">
+      <div class="nav-card__icon nav-card__icon--purple">
+        <ion-icon name="document-text-outline"></ion-icon>
       </div>
-      <div class="pi-bar"><div class="pi-fill" style="width:10%; background:#FFB142"></div></div>
-    </div>
+      <div class="nav-card__body">
+        <p class="nav-card__title">Mis facturas</p>
+        <p class="nav-card__sub">Lista · Filtros · Detalle · Pago</p>
+      </div>
+      <div class="nav-card__end">
+        <span class="status-badge status-badge--ok">Listo</span>
+        <ion-icon name="chevron-forward-outline" class="nav-card__chevron"></ion-icon>
+      </div>
+    </a>
 
-    <div class="progress-item">
-      <div class="pi-header">
-        <span class="pi-label">App Ionic</span>
-        <span class="pi-pct">50%</span>
+    <div class="nav-card nav-card--disabled">
+      <div class="nav-card__icon nav-card__icon--muted">
+        <ion-icon name="bar-chart-outline"></ion-icon>
       </div>
-      <div class="pi-bar"><div class="pi-fill" style="width:50%; background:#FF4757"></div></div>
+      <div class="nav-card__body">
+        <p class="nav-card__title">Dashboard analítico</p>
+        <p class="nav-card__sub">Reportes · Gráficos · IVA mensual</p>
+      </div>
+      <div class="nav-card__end">
+        <span class="status-badge status-badge--pending">Pendiente</span>
+      </div>
     </div>
   </div>
 
-  <!-- Sección: Equipo -->
+  <!-- Infraestructura -->
   <div class="section">
-    <p class="section-label">👥 Equipo</p>
-    <div class="team-row">
+    <p class="section-label">
+      <ion-icon name="server-outline"></ion-icon>
+      Infraestructura
+    </p>
+
+    <div class="infra-list">
+      <div class="infra-row">
+        <div class="infra-row__left">
+          <span class="status-dot status-dot--ok"></span>
+          <span class="infra-row__name">Worker OCR</span>
+        </div>
+        <span class="infra-row__val">{{ workerUrl }}</span>
+      </div>
+      <div class="infra-row">
+        <div class="infra-row__left">
+          <span class="status-dot status-dot--ok"></span>
+          <span class="infra-row__name">n8n</span>
+        </div>
+        <span class="infra-row__val">smartbusinessdam.sytes.net</span>
+      </div>
+      <div class="infra-row">
+        <div class="infra-row__left">
+          <span class="status-dot status-dot--ok"></span>
+          <span class="infra-row__name">Supabase</span>
+        </div>
+        <span class="infra-row__val">zsoynenfjwme…supabase.co</span>
+      </div>
+      <div class="infra-row">
+        <div class="infra-row__left">
+          <span class="status-dot status-dot--warn"></span>
+          <span class="infra-row__name">Kubernetes</span>
+        </div>
+        <span class="infra-row__val infra-row__val--warn">minikube · dev</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Progreso del proyecto -->
+  <div class="section">
+    <p class="section-label">
+      <ion-icon name="layers-outline"></ion-icon>
+      Progreso del proyecto
+    </p>
+
+    <div class="progress-list">
+      <div class="progress-row">
+        <div class="progress-row__header">
+          <span class="progress-row__name">Capa 1 — Extracción OCR</span>
+          <span class="progress-row__pct">75%</span>
+        </div>
+        <div class="progress-row__track">
+          <div class="progress-row__fill progress-row__fill--green" style="width:75%"></div>
+        </div>
+      </div>
+      <div class="progress-row">
+        <div class="progress-row__header">
+          <span class="progress-row__name">Capa 2 — Almacenamiento</span>
+          <span class="progress-row__pct">60%</span>
+        </div>
+        <div class="progress-row__track">
+          <div class="progress-row__fill progress-row__fill--blue" style="width:60%"></div>
+        </div>
+      </div>
+      <div class="progress-row">
+        <div class="progress-row__header">
+          <span class="progress-row__name">Capa 3 — Analíticas</span>
+          <span class="progress-row__pct">10%</span>
+        </div>
+        <div class="progress-row__track">
+          <div class="progress-row__fill progress-row__fill--warn" style="width:10%"></div>
+        </div>
+      </div>
+      <div class="progress-row">
+        <div class="progress-row__header">
+          <span class="progress-row__name">App Ionic</span>
+          <span class="progress-row__pct">50%</span>
+        </div>
+        <div class="progress-row__track">
+          <div class="progress-row__fill progress-row__fill--purple" style="width:50%"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Equipo -->
+  <div class="section">
+    <p class="section-label">
+      <ion-icon name="people-outline"></ion-icon>
+      Equipo
+    </p>
+    <div class="team-grid">
       <div class="team-card">
-        <div class="tc-avatar" style="background:#00D68F22; color:#00D68F">E</div>
-        <p class="tc-name">Erik</p>
-        <p class="tc-role">Frontend / OCR</p>
+        <div class="team-card__avatar team-card__avatar--green">E</div>
+        <p class="team-card__name">Erik</p>
+        <p class="team-card__role">Frontend · OCR</p>
       </div>
       <div class="team-card">
-        <div class="tc-avatar" style="background:#5382FF22; color:#5382FF">S</div>
-        <p class="tc-name">Samuel</p>
-        <p class="tc-role">Arquitectura</p>
+        <div class="team-card__avatar team-card__avatar--blue">S</div>
+        <p class="team-card__name">Samuel</p>
+        <p class="team-card__role">Arquitectura</p>
       </div>
       <div class="team-card">
-        <div class="tc-avatar" style="background:#FFB14222; color:#FFB142">J</div>
-        <p class="tc-name">Juan Pablo</p>
-        <p class="tc-role">Kubernetes</p>
+        <div class="team-card__avatar team-card__avatar--warn">J</div>
+        <p class="team-card__name">Juan Pablo</p>
+        <p class="team-card__role">Kubernetes</p>
       </div>
     </div>
   </div>
 
   <!-- Footer -->
-  <div class="dev-footer">
-    <p>ETITC · DAM · 2026</p>
-    <p>Rama: <span class="accent">erik/desarrollo</span></p>
+  <div class="home-footer">
+    <div class="home-footer__row">
+      <ion-icon name="git-branch-outline" class="home-footer__icon"></ion-icon>
+      <span class="home-footer__branch">erik/desarrollo</span>
+    </div>
+    <p class="home-footer__copy">ETITC Bogotá · DAM · 2026</p>
   </div>
 
 </ion-content>

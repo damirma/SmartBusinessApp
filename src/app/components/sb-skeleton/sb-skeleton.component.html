@@ -1,0 +1,28 @@
+@for (item of items; track item) {
+  @switch (variant) {
+    @case ('card') {
+      <div class="sk-card" [class.sk-animated]="animated">
+        <div class="sk-card__left">
+          <div class="sk-dot"></div>
+          <div class="sk-lines">
+            <div class="sk-line sk-line--title"></div>
+            <div class="sk-line sk-line--sub"></div>
+            <div class="sk-line sk-line--xs"></div>
+          </div>
+        </div>
+        <div class="sk-card__right">
+          <div class="sk-line sk-line--amount"></div>
+          <div class="sk-pill"></div>
+        </div>
+      </div>
+    }
+    @case ('row') {
+      <div class="sk-row" [class.sk-animated]="animated">
+        <div class="sk-line sk-line--full"></div>
+      </div>
+    }
+    @case ('block') {
+      <div class="sk-block" [class.sk-animated]="animated" [style.height]="height || '80px'"></div>
+    }
+  }
+}
