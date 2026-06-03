@@ -5,6 +5,7 @@ import { FormsModule } from '@angular/forms';
 import {
   IonHeader, IonToolbar, IonTitle, IonContent,
   IonButton, IonIcon, IonButtons, IonBackButton,
+  ToastController,
 } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
 import {
@@ -31,6 +32,7 @@ export class DetallePage implements OnInit {
   private route          = inject(ActivatedRoute);
   private router         = inject(Router);
   private facturaService = inject(FacturaService);
+  private toastCtrl      = inject(ToastController);
 
   factura: any     = null;
   items: any[]     = [];
@@ -175,18 +177,52 @@ export class DetallePage implements OnInit {
     if (this.factura?.cufe) navigator.clipboard.writeText(this.factura.cufe);
   }
 
-  compartir(): void {
+  async compartir(): Promise<void> {
     if (!this.factura) return;
+
     const texto = [
-      `Factura ${this.factura.numero}`,
-      `Proveedor: ${this.factura.proveedor_nombre}`,
-      `Total: $${this.factura.total_pagar?.toLocaleString('es-CO')}`,
-      `Estado: ${this.estadoLabel(this.factura.estado)}`,
-    ].join('\n');
-    if (navigator.share) {
-      navigator.share({ title: `Factura ${this.factura.numero}`, text: texto });
+      `Factura ${this.factura.numero ?? '—'}`,
+      `Proveedor: ${this.factura.proveedor_nombre ?? '—'}`,
+      `NIT: ${this.factura.proveedor_nit ?? '—'}`,
+      `Fecha: ${this.factura.fecha_emision ?? '—'}`,
+      `Total: $${this.factura.total_pagar?.toLocaleString('es-CO') ?? '0'}`,
+      this.factura.cufe ? `CUFE: ${this.factura.cufe}` : null,
+      '',
+      'Procesado con SmartBusiness OCR',
+    ].filter(l => l !== null).join('\n');
+
+    const shareData = { title: `Factura ${this.factura.numero}`, text: texto };
+
+    if (navigator.share && navigator.canShare?.(shareData)) {
+      try {
+        await navigator.share(shareData);
+      } catch (err: any) {
+        // AbortError = usuario canceló el diálogo — no es un error real
+        if (err?.name !== 'AbortError') {
+          await this.copiarAlPortapapeles(texto);
+        }
+      }
     } else {
-      navigator.clipboard.writeText(texto);
+      await this.copiarAlPortapapeles(texto);
     }
+  }
+
+  private async copiarAlPortapapeles(texto: string): Promise<void> {
+    try {
+      await navigator.clipboard.writeText(texto);
+      await this.mostrarToast('Resumen copiado al portapapeles', 'success');
+    } catch {
+      await this.mostrarToast('No se pudo compartir el resumen', 'danger');
+    }
+  }
+
+  private async mostrarToast(message: string, color: 'success' | 'danger'): Promise<void> {
+    const toast = await this.toastCtrl.create({
+      message,
+      duration: 3000,
+      position: 'bottom',
+      color,
+    });
+    await toast.present();
   }
 }

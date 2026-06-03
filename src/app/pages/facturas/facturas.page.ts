@@ -5,6 +5,7 @@ import { FormsModule }                                 from '@angular/forms';
 import {
   IonHeader, IonToolbar, IonContent, IonBackButton,
   IonButton, IonIcon, IonButtons, IonFab, IonFabButton,
+  ViewWillEnter,
 } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
 import {
@@ -31,7 +32,7 @@ type RangoFecha   = 'todo'  | 'mes'       | 'mes-ant' | '90d';
     IonButton, IonIcon, IonButtons, IonFab, IonFabButton,
   ],
 })
-export class FacturasPage implements OnInit {
+export class FacturasPage implements OnInit, ViewWillEnter {
 
   private facturaService = inject(FacturaService);
   private router         = inject(Router);
@@ -140,11 +141,17 @@ export class FacturasPage implements OnInit {
   }
 
   ngOnInit(): void {
+    // Read lote queryParam once on first load (route doesn't change while page is alive)
     const lote = this.route.snapshot.queryParamMap.get('lote');
     if (lote) {
       this.filtroLote.set(lote);
       this.loteIds.set(lote.split(',').map(s => s.trim()).filter(Boolean));
     }
+  }
+
+  // Fires every time the page gains focus (first load AND when navigating back from detalle).
+  // This ensures the list reflects changes made in detalle (pago, edición).
+  ionViewWillEnter(): void {
     this.cargarFacturas();
   }
 
