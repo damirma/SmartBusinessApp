@@ -1,15 +1,16 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, inject, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import {
   IonHeader, IonToolbar, IonTitle, IonContent,
-  IonButton, IonIcon, IonButtons, IonProgressBar
+  IonButton, IonIcon, IonButtons,
 } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
 import {
-  arrowBackOutline, arrowForwardOutline, checkmarkCircle
+  arrowBackOutline, arrowForwardOutline, checkmarkCircle,
 } from 'ionicons/icons';
+import { FacturaService } from '../../services/factura';
 
 interface Step {
   id: string;
@@ -32,10 +33,13 @@ interface Step {
   imports: [
     CommonModule, FormsModule,
     IonHeader, IonToolbar, IonTitle, IonContent,
-    IonButton, IonIcon, IonButtons, IonProgressBar
+    IonButton, IonIcon, IonButtons,
   ],
 })
 export class OnboardingPage implements OnInit {
+
+  private router         = inject(Router);
+  private facturaService = inject(FacturaService);
 
   currentStep = 0;
   answers: Record<string, any> = {};
@@ -44,6 +48,8 @@ export class OnboardingPage implements OnInit {
   perfil: any = null;
   showFinal = false;
   saving = false;
+
+  animDir = signal<'forward' | 'back'>('forward');
 
   steps: Step[] = [
     {
@@ -187,7 +193,7 @@ export class OnboardingPage implements OnInit {
     },
   ];
 
-  constructor(private router: Router) {
+  constructor() {
     addIcons({ arrowBackOutline, arrowForwardOutline, checkmarkCircle });
   }
 
@@ -199,6 +205,9 @@ export class OnboardingPage implements OnInit {
   get currentStepData() { return this.visibleSteps[this.currentStep]; }
   get progress() {
     return Math.round(((this.currentStep + 1) / this.visibleSteps.length) * 100);
+  }
+  get segmentRange() {
+    return Array.from({ length: this.visibleSteps.length }, (_, i) => i);
   }
 
   loadAnswers() {
@@ -264,20 +273,35 @@ export class OnboardingPage implements OnInit {
   }
 
   goNext() {
+    this.animDir.set('forward');
     if (this.currentStep < this.visibleSteps.length - 1) { this.currentStep++; this.loadStep(); }
     else this.showFinal = true;
   }
   goBack() {
+    this.animDir.set('back');
     if (this.currentStep > 0) { this.currentStep--; this.loadStep(); }
   }
   canNext(): boolean { return this.selectedOpts.length > 0; }
 
   async finalizarOnboarding() {
     this.saving = true;
-    console.log('✅ Respuestas:', this.answers);
-    console.log('🎯 Perfil:', this.perfil);
-    sessionStorage.removeItem('onboarding_answers');
-    this.router.navigate(['/upload']);
-    this.saving = false;
+    const payload = {
+      answers: this.answers,
+      perfil: this.perfil,
+      scores: this.scores,
+    };
+    this.facturaService.guardarPerfil('default', payload as Record<string, unknown>).subscribe({
+      next: () => {
+        sessionStorage.removeItem('onboarding_answers');
+        this.router.navigate(['/upload']);
+        this.saving = false;
+      },
+      error: () => {
+        // Si falla Supabase, igualmente avanzamos — el perfil quedó en sessionStorage ya borrado
+        sessionStorage.removeItem('onboarding_answers');
+        this.router.navigate(['/upload']);
+        this.saving = false;
+      },
+    });
   }
 }

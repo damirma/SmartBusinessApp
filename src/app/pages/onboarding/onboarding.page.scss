@@ -1,66 +1,75 @@
-:host {
-  --primary:   #00D68F;
-  --surface:   #111318;
-  --surface-2: #1A1D24;
-  --surface-3: #22262F;
-  --border:    rgba(255,255,255,0.08);
-  --text-1:    #F0F2F5;
-  --text-2:    #8B919E;
-  --text-3:    #555B67;
-  --radius:    14px;
-  --radius-sm: 10px;
-}
-
 ion-toolbar {
-  --background:   var(--surface);
+  --background:   var(--sb-bg-primary);
   --border-width: 0;
   padding: 4px 8px;
 }
 
+// ── Progreso segmentado ───────────────────────────────────────────
+.progress-segments {
+  display: flex;
+  gap: 4px;
+  padding: 0 16px 10px;
+  background: var(--sb-bg-primary);
+}
+
+.seg {
+  flex: 1;
+  height: 3px;
+  border-radius: 99px;
+  background: rgba(255, 255, 255, 0.1);
+  transition: background 0.3s ease;
+
+  &--done   { background: var(--sb-accent); opacity: 0.5; }
+  &--active { background: var(--sb-accent); opacity: 1; }
+}
+
 .app-title {
-  --color: var(--text-1);
-  font-weight: 700;
+  --color: var(--sb-text-primary);
+  font-weight: var(--sb-font-bold);
   font-size: 17px;
 }
 
 .step-counter {
-  font-size: 12px;
-  color: var(--text-3);
-  font-weight: 600;
-  padding-right: 8px;
+  font-size: var(--sb-text-xs);
+  color: var(--sb-muted);
+  font-weight: var(--sb-font-semibold);
+  padding-right: var(--sb-space-sm);
 }
 
 .onboarding-content {
-  --background:     var(--surface);
+  --background:     var(--sb-bg-primary);
   --padding-bottom: 120px;
 }
 
-// ── Perfil en vivo ──────────────────────────────────────
+// ── Perfil en vivo ────────────────────────────────────────────────
 .perfil-live {
   display: flex;
   align-items: center;
-  gap: 12px;
-  margin: 16px 20px;
-  padding: 12px 16px;
-  background: rgba(0,214,143,0.1);
-  border: 1.5px solid rgba(0,214,143,0.3);
-  border-radius: var(--radius-sm);
-  animation: slideDown 0.3s ease;
+  gap: var(--sb-space-sm);
+  margin: var(--sb-space-md);
+  padding: var(--sb-space-sm) var(--sb-space-md);
+  background: var(--sb-accent-dim);
+  border: 1.5px solid rgba(0, 214, 143, 0.3);
+  border-radius: var(--sb-radius-md);
+  animation: slideDown var(--sb-transition-normal);
 }
+
 .pl-icon { font-size: 22px; flex-shrink: 0; }
 .pl-body { flex: 1; }
+
 .pl-label {
-  font-size: 10px;
+  font-size: var(--sb-text-xs);
   text-transform: uppercase;
   letter-spacing: 0.8px;
-  color: var(--primary);
-  font-weight: 600;
+  color: var(--sb-accent);
+  font-weight: var(--sb-font-semibold);
   margin: 0 0 2px;
 }
+
 .pl-name {
-  font-size: 14px;
-  font-weight: 700;
-  color: var(--primary);
+  font-size: var(--sb-text-sm);
+  font-weight: var(--sb-font-bold);
+  color: var(--sb-accent);
   margin: 0;
 }
 
@@ -69,47 +78,47 @@ ion-toolbar {
   to   { transform: translateY(0);    opacity: 1; }
 }
 
-// ── Step card ────────────────────────────────────────────
+// ── Step card ─────────────────────────────────────────────────────
 .step-card {
-  margin: 0 20px;
-  padding: 24px;
-  background: var(--surface-2);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  animation: fadeIn 0.3s ease;
+  margin: 0 var(--sb-space-md);
+  padding: var(--sb-space-lg);
+  background: var(--sb-bg-card);
+  border: 1px solid var(--sb-border-subtle);
+  border-radius: var(--sb-radius-lg);
+  animation: fadeIn var(--sb-transition-normal);
 }
 
 .step-badge {
   display: inline-flex;
-  background: rgba(0,214,143,0.15);
-  border: 1px solid rgba(0,214,143,0.2);
-  border-radius: 20px;
-  padding: 4px 12px;
-  font-size: 10px;
-  color: var(--primary);
-  font-weight: 700;
+  background: var(--sb-accent-dim);
+  border: 1px solid rgba(0, 214, 143, 0.2);
+  border-radius: var(--sb-radius-full);
+  padding: 4px var(--sb-space-sm);
+  font-size: var(--sb-text-xs);
+  color: var(--sb-accent);
+  font-weight: var(--sb-font-bold);
   text-transform: uppercase;
   letter-spacing: 0.5px;
-  margin-bottom: 16px;
+  margin-bottom: var(--sb-space-md);
 }
 
 .step-title {
   font-size: 21px;
-  font-weight: 800;
-  color: var(--text-1);
+  font-weight: var(--sb-font-bold);
+  color: var(--sb-text-primary);
   line-height: 1.2;
-  margin: 0 0 8px;
+  margin: 0 0 var(--sb-space-sm);
   letter-spacing: -0.3px;
 }
 
 .step-sub {
-  font-size: 13px;
-  color: var(--text-2);
+  font-size: var(--sb-text-sm);
+  color: var(--sb-text-secondary);
   line-height: 1.5;
-  margin: 0 0 20px;
+  margin: 0 0 var(--sb-space-md);
 }
 
-// ── Options ──────────────────────────────────────────────
+// ── Opciones ──────────────────────────────────────────────────────
 .options {
   display: grid;
   grid-template-columns: 1fr;
@@ -124,56 +133,71 @@ ion-toolbar {
   flex-direction: column;
   align-items: flex-start;
   gap: 4px;
-  background: var(--surface-3);
-  border: 1.5px solid var(--border);
-  border-radius: var(--radius-sm);
+  background: var(--sb-bg-overlay);
+  border: 1.5px solid var(--sb-border-light);
+  border-radius: var(--sb-radius-md);
   padding: 14px 36px 14px 14px;
   cursor: pointer;
-  transition: all 0.18s;
+  transition: all var(--sb-transition-fast);
   text-align: left;
-  font-family: inherit;
+  font-family: var(--sb-font-family);
 
-  &:hover { border-color: rgba(255,255,255,0.15); }
+  &:hover { border-color: rgba(255, 255, 255, 0.15); }
 
   &.selected {
-    border-color: var(--primary);
-    background: rgba(0,214,143,0.08);
+    border-color: var(--sb-accent);
+    background: var(--sb-accent-dim);
   }
 }
 
 .opt-check {
   position: absolute;
-  top: 10px; right: 10px;
-  width: 18px; height: 18px;
-  border: 1.5px solid var(--border);
+  top: 10px;
+  right: 10px;
+  width: 18px;
+  height: 18px;
+  border: 1.5px solid var(--sb-border-light);
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 9px;
-  font-weight: 700;
+  font-weight: var(--sb-font-bold);
   color: transparent;
-  transition: all 0.18s;
+  transition: all var(--sb-transition-fast);
 
   &.active {
-    color: var(--primary);
-    border-color: var(--primary);
-    background: rgba(0,214,143,0.15);
+    color: var(--sb-accent);
+    border-color: var(--sb-accent);
+    background: var(--sb-accent-dim);
   }
 }
 
 .opt-icon  { font-size: 20px; margin-bottom: 2px; }
-.opt-label { font-size: 13px; font-weight: 600; color: var(--text-1); }
-.opt-sub   { font-size: 11px; color: var(--text-3); }
+.opt-label { font-size: var(--sb-text-sm); font-weight: var(--sb-font-semibold); color: var(--sb-text-primary); }
+.opt-sub   { font-size: var(--sb-text-xs); color: var(--sb-muted); }
 
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(8px); }
-  to   { opacity: 1; transform: translateY(0); }
+  to   { opacity: 1; transform: translateY(0);   }
 }
 
-// ── Pantalla final ───────────────────────────────────────
+@keyframes slideInForward {
+  from { opacity: 0; transform: translateX(32px); }
+  to   { opacity: 1; transform: translateX(0);    }
+}
+
+@keyframes slideInBack {
+  from { opacity: 0; transform: translateX(-32px); }
+  to   { opacity: 1; transform: translateX(0);     }
+}
+
+.step-card--forward { animation: slideInForward 0.25s cubic-bezier(0.25, 1, 0.5, 1); }
+.step-card--back    { animation: slideInBack 0.25s cubic-bezier(0.25, 1, 0.5, 1);    }
+
+// ── Pantalla final ────────────────────────────────────────────────
 .final-card {
-  padding: 40px 20px 20px;
+  padding: var(--sb-space-2xl) var(--sb-space-md) var(--sb-space-md);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -181,16 +205,21 @@ ion-toolbar {
 }
 
 .final-mark {
-  width: 64px; height: 64px;
-  background: rgba(0,214,143,0.15);
-  border: 2px solid rgba(0,214,143,0.3);
+  width: 64px;
+  height: 64px;
+  background: var(--sb-success-dim);
+  border: 2px solid rgba(0, 214, 143, 0.3);
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 28px;
-  margin-bottom: 20px;
-  animation: pop 0.5s cubic-bezier(0.34,1.56,0.64,1);
+  margin-bottom: var(--sb-space-md);
+  animation: pop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+
+  ion-icon {
+    font-size: 32px;
+    color: var(--sb-success);
+  }
 }
 
 @keyframes pop {
@@ -200,50 +229,50 @@ ion-toolbar {
 
 .final-title {
   font-size: 26px;
-  font-weight: 800;
-  color: var(--text-1);
-  margin: 0 0 8px;
+  font-weight: var(--sb-font-bold);
+  color: var(--sb-text-primary);
+  margin: 0 0 var(--sb-space-sm);
 }
 
 .final-sub {
-  font-size: 14px;
-  color: var(--text-2);
-  margin: 0 0 24px;
+  font-size: var(--sb-text-sm);
+  color: var(--sb-text-secondary);
+  margin: 0 0 var(--sb-space-lg);
   line-height: 1.5;
 }
 
 .final-perfil {
   width: 100%;
-  background: var(--surface-2);
-  border: 1.5px solid rgba(0,214,143,0.2);
-  border-radius: var(--radius);
-  padding: 20px;
-  margin-bottom: 24px;
+  background: var(--sb-bg-card);
+  border: 1.5px solid rgba(0, 214, 143, 0.2);
+  border-radius: var(--sb-radius-lg);
+  padding: var(--sb-space-md);
+  margin-bottom: var(--sb-space-lg);
   text-align: left;
 }
 
 .fp-header {
   display: flex;
   align-items: center;
-  gap: 12px;
-  margin-bottom: 14px;
+  gap: var(--sb-space-sm);
+  margin-bottom: var(--sb-space-sm);
 }
 
-.fp-icon   { font-size: 28px; }
-.fp-label  { font-size: 10px; text-transform: uppercase; letter-spacing: 0.8px; color: var(--primary); font-weight: 600; margin: 0 0 2px; }
-.fp-name   { font-size: 16px; font-weight: 700; color: var(--primary); margin: 0; }
+.fp-icon  { font-size: 28px; }
+.fp-label { font-size: var(--sb-text-xs); text-transform: uppercase; letter-spacing: 0.8px; color: var(--sb-accent); font-weight: var(--sb-font-semibold); margin: 0 0 2px; }
+.fp-name  { font-size: var(--sb-text-base); font-weight: var(--sb-font-bold); color: var(--sb-accent); margin: 0; }
 
-.fp-scores { display: flex; gap: 8px; flex-wrap: wrap; }
+.fp-scores { display: flex; gap: var(--sb-space-sm); flex-wrap: wrap; }
 
 .score-tag {
-  font-size: 10px;
+  font-size: var(--sb-text-xs);
   padding: 4px 10px;
-  border-radius: 20px;
-  font-weight: 700;
+  border-radius: var(--sb-radius-full);
+  font-weight: var(--sb-font-bold);
 
-  &.inv { background: rgba(0,214,143,0.15);  color: var(--primary); }
-  &.svc { background: rgba(83,130,255,0.15); color: #5382FF; }
-  &.aud { background: rgba(255,177,66,0.15); color: #FFB142; }
+  &.inv { background: var(--sb-success-dim); color: var(--sb-success); }
+  &.svc { background: var(--sb-info-dim);    color: var(--sb-info);    }
+  &.aud { background: var(--sb-warning-dim); color: var(--sb-warning); }
 }
 
 .action-btn {
@@ -252,45 +281,49 @@ ion-toolbar {
   align-items: center;
   justify-content: center;
   gap: 10px;
-  background: var(--primary);
+  background: var(--sb-accent);
   color: #000;
   border: none;
-  border-radius: var(--radius-sm);
-  padding: 16px;
-  font-size: 15px;
-  font-weight: 700;
+  border-radius: var(--sb-radius-md);
+  padding: var(--sb-space-md);
+  font-size: var(--sb-text-base);
+  font-weight: var(--sb-font-bold);
   cursor: pointer;
-  font-family: inherit;
-  transition: all 0.2s;
+  font-family: var(--sb-font-family);
+  transition: all var(--sb-transition-fast);
+  box-shadow: var(--sb-shadow-accent);
 
   ion-icon { font-size: 18px; }
-  &:disabled { opacity: 0.5; }
+  &:disabled { opacity: 0.5; box-shadow: none; }
   &:active:not(:disabled) { transform: scale(0.98); }
 }
 
-// ── Navegación pie ───────────────────────────────────────
+// ── Navegación pie ────────────────────────────────────────────────
 .nav-footer {
   position: fixed;
-  bottom: 0; left: 0; right: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
   display: flex;
   gap: 10px;
-  padding: 16px 20px 32px;
-  background: linear-gradient(to top, var(--surface) 60%, transparent);
+  padding: var(--sb-space-md) var(--sb-space-md) 32px;
+  background: linear-gradient(to top, var(--sb-bg-primary) 60%, transparent);
 }
 
-.btn-back, .btn-next {
+.btn-back,
+.btn-next {
   flex: 1;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
-  border-radius: var(--radius-sm);
+  gap: var(--sb-space-sm);
+  border-radius: var(--sb-radius-md);
   padding: 13px;
-  font-size: 14px;
-  font-weight: 600;
+  font-size: var(--sb-text-sm);
+  font-weight: var(--sb-font-semibold);
   cursor: pointer;
-  font-family: inherit;
-  transition: all 0.18s;
+  font-family: var(--sb-font-family);
+  transition: all var(--sb-transition-fast);
   border: none;
 
   ion-icon { font-size: 16px; }
@@ -299,13 +332,14 @@ ion-toolbar {
 }
 
 .btn-back {
-  background: var(--surface-2);
-  color: var(--text-2);
-  border: 1px solid var(--border);
+  background: var(--sb-bg-card);
+  color: var(--sb-text-secondary);
+  border: 1px solid var(--sb-border-subtle);
 }
 
 .btn-next {
-  background: var(--primary);
+  background: var(--sb-accent);
   color: #000;
-  font-weight: 700;
+  font-weight: var(--sb-font-bold);
+  box-shadow: var(--sb-shadow-accent);
 }

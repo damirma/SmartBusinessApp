@@ -215,6 +215,9 @@
               <span class="fc-badge" [class]="'fc-badge--' + (f.estado ?? 'pendiente')">
                 {{ estadoLabel(f.estado) }}
               </span>
+              @if (f.editado_por_usuario) {
+                <span class="fc-badge-corregido">Corregido</span>
+              }
               @if (f.fecha_vencimiento && f.estado !== 'pagada') {
                 <p class="fc-vence">Vence {{ f.fecha_vencimiento | date:'d MMM':'':'es-CO' }}</p>
               }

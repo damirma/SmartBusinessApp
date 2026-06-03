@@ -666,6 +666,19 @@ ion-toolbar {
   }
 }
 
+.fc-badge-corregido {
+  display:        inline-block;
+  font-size:      10px;
+  font-weight:    var(--sb-font-bold);
+  padding:        2px 7px;
+  border-radius:  var(--sb-radius-full);
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  background:     rgba(83, 130, 255, 0.12);
+  color:          #5382FF;
+  border:         1px solid rgba(83, 130, 255, 0.25);
+}
+
 .fc-vence {
   font-size:   10px;
   font-weight: var(--sb-font-medium);

@@ -10,76 +10,97 @@
       <span class="step-counter">{{ currentStep + 1 }}/{{ visibleSteps.length }}</span>
     </ion-buttons>
   </ion-toolbar>
-  <ion-progress-bar [value]="progress / 100" color="success"></ion-progress-bar>
+
+  <!-- Barra de progreso segmentada -->
+  <div class="progress-segments">
+    @for (i of segmentRange; track i) {
+      <div class="seg" [class.seg--done]="i < currentStep" [class.seg--active]="i === currentStep"></div>
+    }
+  </div>
 </ion-header>
 
 <ion-content class="onboarding-content">
 
   <!-- Perfil en vivo -->
-  <div class="perfil-live" *ngIf="perfil && perfil.nombre && currentStep > 0">
-    <div class="pl-icon">{{ perfil.icon }}</div>
-    <div class="pl-body">
-      <p class="pl-label">Perfil detectado</p>
-      <p class="pl-name">{{ perfil.nombre }}</p>
+  @if (perfil && perfil.nombre && currentStep > 0) {
+    <div class="perfil-live">
+      <div class="pl-icon">{{ perfil.icon }}</div>
+      <div class="pl-body">
+        <p class="pl-label">Perfil detectado</p>
+        <p class="pl-name">{{ perfil.nombre }}</p>
+      </div>
     </div>
-  </div>
+  }
 
   <!-- Paso actual -->
-  <div class="step-card" *ngIf="currentStepData && !showFinal">
-    <div class="step-badge">{{ currentStepData.badge }}</div>
-    <h1 class="step-title">{{ currentStepData.title }}</h1>
-    <p class="step-sub">{{ currentStepData.sub }}</p>
+  @if (currentStepData && !showFinal) {
+    <div class="step-card" [class.step-card--forward]="animDir() === 'forward'" [class.step-card--back]="animDir() === 'back'">
+      <div class="step-badge">{{ currentStepData.badge }}</div>
+      <h1 class="step-title">{{ currentStepData.title }}</h1>
+      <p class="step-sub">{{ currentStepData.sub }}</p>
 
-    <div class="options" [ngClass]="{ 'cols-2': currentStepData.cols === 2 }">
-      <button *ngFor="let opt of currentStepData.opts"
-              class="option"
-              [class.selected]="selectedOpts.includes(opt.val)"
-              (click)="toggleOption(opt.val)">
-        <span class="opt-check" [class.active]="selectedOpts.includes(opt.val)">✓</span>
-        <span class="opt-icon">{{ opt.icon }}</span>
-        <span class="opt-label">{{ opt.label }}</span>
-        <span class="opt-sub" *ngIf="opt.sub">{{ opt.sub }}</span>
-      </button>
+      <div class="options" [ngClass]="{ 'cols-2': currentStepData.cols === 2 }">
+        @for (opt of currentStepData.opts; track opt.val) {
+          <button class="option"
+                  [class.selected]="selectedOpts.includes(opt.val)"
+                  (click)="toggleOption(opt.val)">
+            <span class="opt-check" [class.active]="selectedOpts.includes(opt.val)">✓</span>
+            <span class="opt-icon">{{ opt.icon }}</span>
+            <span class="opt-label">{{ opt.label }}</span>
+            @if (opt.sub) {
+              <span class="opt-sub">{{ opt.sub }}</span>
+            }
+          </button>
+        }
+      </div>
     </div>
-  </div>
+  }
 
   <!-- Pantalla final -->
-  <div class="final-card" *ngIf="showFinal">
-    <div class="final-mark">✓</div>
-    <h2 class="final-title">¡Listo!</h2>
-    <p class="final-sub">Tu sistema está configurado según tu negocio.</p>
+  @if (showFinal) {
+    <div class="final-card">
+      <div class="final-mark">
+        <ion-icon name="checkmark-circle"></ion-icon>
+      </div>
+      <h2 class="final-title">¡Listo!</h2>
+      <p class="final-sub">Tu sistema está configurado según tu negocio.</p>
 
-    <div class="final-perfil" *ngIf="perfil">
-      <div class="fp-header">
-        <span class="fp-icon">{{ perfil.icon }}</span>
-        <div>
-          <p class="fp-label">Tu perfil</p>
-          <p class="fp-name">{{ perfil.nombre }}</p>
+      @if (perfil) {
+        <div class="final-perfil">
+          <div class="fp-header">
+            <span class="fp-icon">{{ perfil.icon }}</span>
+            <div>
+              <p class="fp-label">Tu perfil</p>
+              <p class="fp-name">{{ perfil.nombre }}</p>
+            </div>
+          </div>
+          <div class="fp-scores">
+            <span class="score-tag inv">Inventario: {{ scores.inv }}pts</span>
+            <span class="score-tag svc">Servicios: {{ scores.svc }}pts</span>
+            <span class="score-tag aud">Auditable: {{ scores.aud }}pts</span>
+          </div>
         </div>
-      </div>
-      <div class="fp-scores">
-        <span class="score-tag inv">Inventario: {{ scores.inv }}pts</span>
-        <span class="score-tag svc">Servicios: {{ scores.svc }}pts</span>
-        <span class="score-tag aud">Auditable: {{ scores.aud }}pts</span>
-      </div>
+      }
+
+      <button class="action-btn" (click)="finalizarOnboarding()" [disabled]="saving">
+        <ion-icon name="checkmark-circle"></ion-icon>
+        {{ saving ? 'Guardando...' : 'Empezar a usar SmartBusiness' }}
+      </button>
     </div>
+  }
 
-    <button class="action-btn" (click)="finalizarOnboarding()" [disabled]="saving">
-      <ion-icon name="checkmark-circle"></ion-icon>
-      {{ saving ? 'Guardando...' : 'Empezar a usar SmartBusiness' }}
-    </button>
-  </div>
-
-  <!-- Navegación -->
-  <div class="nav-footer" *ngIf="!showFinal">
-    <button class="btn-back" (click)="goBack()" [disabled]="currentStep === 0">
-      <ion-icon name="arrow-back-outline"></ion-icon>
-      Atrás
-    </button>
-    <button class="btn-next" (click)="goNext()" [disabled]="!canNext()">
-      {{ currentStep === visibleSteps.length - 1 ? 'Finalizar' : 'Continuar' }}
-      <ion-icon name="arrow-forward-outline"></ion-icon>
-    </button>
-  </div>
+  <!-- Navegación pie -->
+  @if (!showFinal) {
+    <div class="nav-footer">
+      <button class="btn-back" (click)="goBack()" [disabled]="currentStep === 0">
+        <ion-icon name="arrow-back-outline"></ion-icon>
+        Atrás
+      </button>
+      <button class="btn-next" (click)="goNext()" [disabled]="!canNext()">
+        {{ currentStep === visibleSteps.length - 1 ? 'Finalizar' : 'Continuar' }}
+        <ion-icon name="arrow-forward-outline"></ion-icon>
+      </button>
+    </div>
+  }
 
 </ion-content>

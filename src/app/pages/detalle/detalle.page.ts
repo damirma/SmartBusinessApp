@@ -11,9 +11,10 @@ import {
   arrowBackOutline, shareOutline, listOutline, receiptOutline,
   shieldCheckmarkOutline, checkmarkCircleOutline, closeCircleOutline,
   alertCircleOutline, copyOutline, closeOutline, checkmarkOutline,
-  ellipseOutline, timeOutline,
+  ellipseOutline, timeOutline, createOutline, saveOutline,
 } from 'ionicons/icons';
 import { FacturaService } from '../../services/factura';
+import { Factura } from '../../models';
 
 @Component({
   selector: 'app-detalle',
@@ -38,20 +39,24 @@ export class DetallePage implements OnInit {
 
   cargando         = signal(true);
   mostrarModalPago = signal(false);
+  modoEdicion      = signal(false);
 
-  guardandoPago = false;
-  fechaPago     = new Date().toISOString().split('T')[0];
-  formaPago     = 'Transferencia';
-  hoy           = new Date().toISOString().split('T')[0];
+  guardandoPago    = false;
+  guardandoEdicion = false;
+  fechaPago        = new Date().toISOString().split('T')[0];
+  formaPago        = 'Transferencia';
+  hoy              = new Date().toISOString().split('T')[0];
 
   readonly fromLote = signal(false);
+
+  edicion: Partial<Factura> & { numero?: string; proveedor_nombre?: string; proveedor_nit?: string } = {};
 
   constructor() {
     addIcons({
       arrowBackOutline, shareOutline, listOutline, receiptOutline,
       shieldCheckmarkOutline, checkmarkCircleOutline, closeCircleOutline,
       alertCircleOutline, copyOutline, closeOutline, checkmarkOutline,
-      ellipseOutline, timeOutline,
+      ellipseOutline, timeOutline, createOutline, saveOutline,
     });
   }
 
@@ -86,6 +91,40 @@ export class DetallePage implements OnInit {
       error: () => { this.cargando.set(false); },
     });
   }
+
+  // ── Edición de campos ──────────────────────────────────────────────
+
+  entrarEdicion(): void {
+    this.edicion = {
+      numero:           this.factura.numero,
+      proveedor_nombre: this.factura.proveedor_nombre,
+      proveedor_nit:    this.factura.proveedor_nit,
+      total_pagar:      this.factura.total_pagar,
+      fecha_emision:    this.factura.fecha_emision,
+    };
+    this.modoEdicion.set(true);
+  }
+
+  cancelarEdicion(): void {
+    this.edicion = {};
+    this.modoEdicion.set(false);
+  }
+
+  guardarEdicion(): void {
+    if (!this.factura?.id || this.guardandoEdicion) return;
+    this.guardandoEdicion = true;
+    this.facturaService.actualizarCampos(this.factura.id, this.edicion as Partial<Factura>).subscribe({
+      next: () => {
+        Object.assign(this.factura, this.edicion, { editado_por_usuario: true });
+        this.edicion = {};
+        this.modoEdicion.set(false);
+        this.guardandoEdicion = false;
+      },
+      error: () => { this.guardandoEdicion = false; },
+    });
+  }
+
+  // ── Estado y pago ────────────────────────────────────────────────
 
   iconoEstado(estado: string): string {
     const iconos: Record<string, string> = {
