@@ -18,43 +18,48 @@
 - [x] Home rediseñada con sistema visual nuevo
 
 ### Pendientes UI (próxima sesión)
-- [ ] **UI upload** — rediseño visual consistente con home
-- [ ] **UI facturas** — filtros como tabs, badges de estado pulidos
-- [ ] **UI detalle** — header sticky, secciones separadas, tabla limpia
-- [ ] **UI onboarding** — progreso 7 pasos, transiciones suaves
-- [ ] **UX nav** — fix back-arrows, auditoría ion-back-button
+- [x] **UI upload** — back-button, segmento accent verde, radios 16-24px
+- [x] **UI facturas** — rewrite completo con Signals, agrupación, filtros, skeletons
+- [x] **UI detalle** — @if/@for, cargando+modal como Signals, skeletons, back contextual
+- [ ] **UI onboarding** — redesign estilo iPhone dark, motion suave en transiciones de paso
+- [x] **UX nav** — ion-back-button en upload/facturas; back contextual en detalle
 
-## Fase 1.5 — Inteligencia de presentación
+### Próximos (en orden de prioridad)
+- [ ] **UI onboarding** — redesign 7 pasos con motion (primera prioridad siguiente sesión)
+- [ ] **B7** — Edición de campos extraídos en detalle.page (modo edit + PATCH Supabase)
+- [ ] **Fase 1 cierre** — verificar 100% de funcionalidad E2E con backend real
+
+## Fase 1.5 — Inteligencia de presentación ✅ COMPLETA (commit 0dd55ab, 2026-06-02)
 
 ### Navegación contextual (lote)
-- [ ] **Nav-A** — `SesionCargaService`: signal de lote actual, iniciarLote/agregarAFLote
-- [ ] **Nav-B** — upload.page: llamar al servicio, pasar `?from=lote` al navegar a detalle
-- [ ] **Nav-C** — detalle.page: leer queryParam `from`, ajustar destino del back-button
+- [x] **Nav-A** — `SesionCargaService`: signal de lote actual, iniciarLote/agregarALote
+- [x] **Nav-B** — upload.page: llama al servicio, pasa `?from=lote` al navegar a detalle
+- [x] **Nav-C** — detalle.page: lee queryParam `from`, `goBack()` contextual
 
 ### Lista de facturas inteligente
-- [ ] **List-A** — Agrupación por mes | proveedor | sin agrupar (Signals + computed)
-- [ ] **List-B** — Ordenamiento dentro del grupo (fecha asc/desc, monto asc/desc)
-- [ ] **List-C** — Filtros: estado + rango de fechas + búsqueda libre
-- [ ] **List-D** — Sticky headers al agrupar
-- [ ] **List-E** — Resumen global (tarjeta top) con totales y mini-stats
-- [ ] **List-F** — Filtro de lote: `?lote=id` → chip "Lote: N facturas" + salir
+- [x] **List-A** — Agrupación por mes | proveedor | sin agrupar (Signals + computed)
+- [x] **List-B** — Ordenamiento dentro del grupo (fecha asc/desc, monto asc/desc)
+- [x] **List-C** — Filtros: estado + rango de fechas + búsqueda libre
+- [x] **List-D** — Sticky headers al agrupar
+- [x] **List-E** — Resumen global (tarjeta top) con totales y mini-stats
+- [x] **List-F** — Filtro de lote: `?lote=ids` → chip "Salir del lote"
 
 ### Revisar lote (upload.page)
-- [ ] **Lote-A** — Sección "Revisar las N facturas cargadas" en modo masiva
-- [ ] **Lote-B** — Navegación al lote en facturas.page
+- [x] **Lote-A** — Card "Revisar N facturas cargadas" en modo masiva
+- [x] **Lote-B** — Navega a /facturas?lote=ids
 
 ### Skeleton components
-- [ ] **Skel-A** — `SbSkeletonComponent` standalone (variantes: card, row, block)
-- [ ] **Skel-B** — Shimmer animation con tokens del sistema
-- [ ] **Skel-C** — Aplicar en facturas.page (loading inicial)
-- [ ] **Skel-D** — Aplicar en detalle.page (loading de factura)
+- [x] **Skel-A** — `SbSkeletonComponent` standalone (card/row/block)
+- [x] **Skel-B** — Shimmer gradient con sb-tokens
+- [x] **Skel-C** — Skeletons inline en facturas.page
+- [x] **Skel-D** — Skeletons inline en detalle.page
 
 ## Fase 2 — n8n + Telegram
-- [ ] **D2** — n8n router completo (webhook detecta formato, enruta)
-- [ ] **D5** — Cola de procesamiento en n8n
-- [ ] **D4** — Manejo de errores y reintentos
-- [ ] **C2** — Bot de Telegram (foto → resumen)
-- [ ] **D3** — Notificaciones al terminar
+- [ ] **D2** — n8n router completo: webhook detecta formato (XML/PDF/imagen), enruta a worker-ocr
+- [ ] **D5** — Cola de procesamiento en n8n (retry + dead-letter)
+- [ ] **D4** — Manejo de errores y reintentos automáticos
+- [ ] **C2** — Bot de Telegram: foto de factura → OCR → resumen en chat
+- [ ] **D3** — Notificaciones al terminar procesamiento
 
 ## Fase 3 — Multi-tenant
 - [ ] **E1** — Autenticación Supabase Auth
@@ -64,8 +69,9 @@
 - [ ] **F1** — Dashboard analítico
 
 ## Deuda técnica conocida
-- [ ] IP hardcodeada en home.page.html → usar environment.workerUrl
-- [ ] Back-arrows rotas → auditar ion-back-button en todas las páginas
+- [x] IP hardcodeada en home.page.html → resuelto: usa environment.workerUrl
+- [x] Back-arrows rotas → resuelto: ion-back-button en upload/facturas; goBack() en detalle
 - [ ] CORS sin restricciones en worker-ocr (aceptable para MVP académico)
 - [ ] Sin autenticación de usuarios (Fase 3)
-- [ ] Mover URLs hardcodeadas a environment.ts (ya están, verificar workerUrl)
+- [ ] Migrar local CSS vars (--surface, --primary) en detalle.page.scss a sb-tokens globales
+- [ ] SbSkeletonComponent no está integrado en detalle.page (usa skeletons inline propios)

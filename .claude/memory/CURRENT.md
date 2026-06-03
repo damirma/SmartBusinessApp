@@ -1,65 +1,64 @@
 # Current Focus
 
-**Phase:** 1.5 — Inteligencia de presentación
-**Última actualización:** 2026-06-02
+**Fase activa:** 1 → 80% completada | 1.5 → 100% completada  
+**Última actualización:** 2026-06-02 (cierre de sesión)
 
-## Completado en esta sesión (2026-06-02)
+---
 
-### Fix rápido
-- **IP hardcodeada en home.page** — ahora lee `environment.workerUrl` (fix de "34.26.53.228" → "146.148.80.200")
+## Completado esta sesión (2026-06-02) — commit 0dd55ab
 
-### UI — Upload page (polish)
-- `ion-back-button` en lugar del logo SB en el toolbar
-- Segmento verde sólido para tab activo (accent bg, black text)
-- Radios aumentados: drop-zone → `radius-xl` (24px), cards → `radius-lg` (16px)
+### Fix IP dinámica en home.page
+- `home.page.html` ahora lee `environment.workerUrl` — ya no hay IP hardcodeada
 
-### Navegación contextual (Fase 1.5-A)
-- **`SesionCargaService`** creado: signal del lote actual con `iniciarLote`, `agregarALote`, `limpiarLote`, `estaEnLoteActual`
-- **upload.page**: llama al servicio al procesar (individual y masiva); pasa `?from=lote` al navegar al detalle
-- **detalle.page**: lee `queryParam 'from'`; `goBack()` navega a `/upload` si viene de lote, `/facturas` si no
+### Upload page polish
+- `ion-back-button` en toolbar (text="")
+- Segmento accent: tab activo con bg verde sólido, texto negro
+- Radios aumentados: drop-zone → 24px, cards → 16px
 
-### Lista de facturas inteligente (Fase 1.5-B)
-- **`src/app/utils/agrupar-facturas.ts`** — helper puro: agrupación mes/proveedor/flat, ordenamiento, subtítulos con formato compacto
-- **facturas.page** completo rewrite (Signals + computed):
-  - Agrupación seleccionable: Por mes | Por proveedor | Sin agrupar
+### Fase 1.5-A — Navegación contextual (lote)
+- **`SesionCargaService`** — signal del lote actual: `iniciarLote`, `agregarALote`, `limpiarLote`, `estaEnLoteActual`
+- **upload.page** — llama al servicio al procesar (individual y masiva); pasa `?from=lote` al navegar a detalle
+- **detalle.page** — lee queryParam `from`; `goBack()` envía a `/upload` si viene de lote, `/facturas` si no
+
+### Fase 1.5-B — Lista de facturas inteligente (rewrite total)
+- Helper puro `src/app/utils/agrupar-facturas.ts` — agrupación mes/proveedor/flat, ordenamiento, subtítulos
+- `facturas.page` reescrita con Signals + computed:
+  - Agrupación: Por mes | Por proveedor | Sin agrupar
   - Ordenamiento: Más reciente | Más antiguo | Mayor monto | Menor monto
-  - Filtros chips: estado (Todos/Pendientes/Pagadas/Vencidas) + rango de fecha (Todo/Este mes/Mes pasado/90 días)
+  - Filtros chips: estado (Todos/Pendientes/Pagadas/Vencidas) + rango (Todo/Este mes/Mes pasado/90 días)
   - Búsqueda libre por número, proveedor, NIT
   - Sticky group headers
-  - Resumen card global con stats coloreados (verde/naranja/rojo)
-  - Monto por pagar (row separado, danger)
-  - Skeletons inline (shimmer) en lugar de spinner
-  - Empty states diferenciados: sin data vs. filtros sin resultados
-  - Filtro de lote: `?lote=id1,id2,id3` → chip "Salir del lote" + filtrado automático
+  - Resumen card global con totales coloreados
+  - Skeletons shimmer en lugar de spinner
+  - Empty states diferenciados
+  - Filtro de lote: `?lote=id1,id2,id3` → chip "Salir del lote"
 
-### Card "Revisar lote" (Fase 1.5-C)
-- Upload.page modo masiva: cuando ≥1 procesada aparece card verde con botón "Revisar"
-- Navega a `/facturas?lote=ids` con todos los IDs del lote actual
-- Al limpiar el batch también limpia el lote del servicio
+### Fase 1.5-C — Card "Revisar lote" en upload.page
+- Aparece cuando ≥1 archivo procesado en modo masiva
+- Navega a `/facturas?lote=ids`
+- Limpiar batch también limpia el lote del servicio
 
-### Skeleton component (Fase 1.5-D)
-- **`SbSkeletonComponent`** standalone creado en `src/app/components/sb-skeleton/`
-- Variantes: `card` | `row` | `block`, con `count`, `height`, `animated` inputs
-- Shimmer con gradient sweep usando sb-tokens
+### Fase 1.5-D — SbSkeletonComponent
+- Standalone en `src/app/components/sb-skeleton/`
+- Variantes: `card` | `row` | `block`, con inputs `count`, `height`, `animated`
+- Shimmer gradient usando sb-tokens
 
 ### Detalle page — modernización
-- Control flow Angular 17+: `@if` / `@for ... track` en lugar de `*ngIf` / `*ngFor`
-- Spinner reemplazado por skeleton cards inline
-- `cargando` y `mostrarModalPago` → Signals
-- `inject()` pattern para DI
+- Control flow `@if` / `@for ... track` (Angular 17+)
+- `cargando` y `mostrarModalPago` como Signals
+- Skeletons inline reemplazan al spinner
 
-## Próximos pasos
+---
 
-### Páginas pendientes (rediseño visual)
-- [ ] **onboarding.page** — 7 pasos con motion suave (siguiente sesión)
-- [ ] **detalle.page** — mejorar visualmente con sb-tokens (usa local vars aún)
-- [ ] Evaluación: usar `SbSkeletonComponent` en detalle.page
+## Próxima sesión — orden de prioridad
 
-### Funcionalidad
-- [ ] **B7** — Edición de campos en detalle.page (Prompt 2 ROADMAP)
-- [ ] Guardar perfil onboarding en `perfil_extraccion` (Supabase)
-- [ ] Autenticación usuarios (Fase 3)
+1. **Onboarding redesign** — estilo iPhone dark, 7 pasos con motion suave en transiciones
+2. **B7** — Edición de campos extraídos en detalle.page (modo edit + PATCH Supabase)
+3. **Cerrar Fase 1** — verificación E2E con backend real (`146.148.80.200:30080`)
+4. **Fase 2** — n8n en producción: router de formato (XML/PDF/imagen) + bot Telegram
+
+---
 
 ## Bloqueantes
 - Ninguno técnico
-- Backend (worker-ocr) requiere `146.148.80.200:30080` — app funciona, OCR solo en prod
+- worker-ocr requiere `146.148.80.200:30080` — OCR solo en prod, app local funciona sin él

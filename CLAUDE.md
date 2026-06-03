@@ -1,6 +1,6 @@
 /# SmartBusinessApp — CLAUDE.md
 
-Documento de contexto completo para Claude Code. Actualizado: 2026-06-02.
+Documento de contexto completo para Claude Code. Actualizado: 2026-06-02 (sesión 2).
 
 ---
 
@@ -114,8 +114,15 @@ SmartBusinessApp/
 │       │   ├── facturas/        ← lista con filtros
 │       │   └── detalle/         ← vista completa + pago
 │       │
+│       ├── components/
+│       │   └── sb-skeleton/     ← SbSkeletonComponent standalone (card/row/block + shimmer)
+│       │
+│       ├── utils/
+│       │   └── agrupar-facturas.ts ← helper puro: agrupa/ordena facturas por mes o proveedor
+│       │
 │       └── services/
-│           └── factura.ts       ← HTTP client (worker-ocr + Supabase REST)
+│           ├── factura.ts       ← HTTP client (worker-ocr + Supabase REST)
+│           └── sesion-carga.service.ts ← signal del lote de facturas procesadas en el batch
 │
 ├── worker-ocr/                  ← microservicio Python
 │   ├── main.py                  ← Flask app, 334 líneas
@@ -194,8 +201,10 @@ Cuestionario multi-step para configurar el perfil de extracción de la empresa. 
 ### `pages/upload/` — Subida y Procesamiento
 Interfaz principal de carga de facturas. Dos modos coexisten via `IonSegment`:
 
-**Modo Individual:** un archivo → Procesar → result card con resumen + "Ver detalle completo" → `/detalle/:id`  
-**Modo Masiva:** drag-and-drop multi-archivo, lista con progreso, máx 3 concurrentes, card clickeable al terminar → `/detalle/:id`
+**Modo Individual:** archivo → Procesar → result card → navega a `/detalle/:id?from=lote`  
+**Modo Masiva:** drag-and-drop multi-archivo, lista con progreso, máx 3 concurrentes.
+- Al terminar ≥1 archivo: aparece card verde "Revisar N facturas" → `/facturas?lote=ids`
+- Cada archivo completado: navega a `/detalle/:id?from=lote` al hacer click
 
 **Formatos soportados:** XML, PDF, JPG, JPEG, PNG (ZIP excluido por ahora)
 
@@ -204,21 +213,34 @@ Interfaz principal de carga de facturas. Dos modos coexisten via `IonSegment`:
 2. XML → `procesarXML(texto)` — parse directo, sin IA
 3. PDF/imagen → `procesarImagen(b64, mimeType)` — Groq (Llama Scout visión)
 4. Resultado guardado en Supabase; `facturaId` extraído de `resultado.guardado?.factura_id`
+5. `SesionCargaService.agregarALote(facturaId)` registra el ID en el lote actual
 
-**Estado:** Implementado + rediseño UI pendiente. Requiere worker-ocr en `146.148.80.200:30080`.
+**Lote contextual:** `SesionCargaService` (signal) mantiene los IDs del batch actual.
+Al iniciar un nuevo batch: `iniciarLote()`. Al navegar al detalle: `?from=lote` en queryParam.
+
+**Estado:** Implementado y rediseñado. Requiere worker-ocr en `146.148.80.200:30080`.
 
 ---
 
-### `pages/facturas/` — Lista de Facturas
-Vista de todas las facturas procesadas con filtrado y búsqueda.
+### `pages/facturas/` — Lista de Facturas (reescrita en Fase 1.5)
+Vista inteligente de facturas con agrupación, ordenamiento y filtros múltiples.
 
-**Filtros:** Todos / Pendientes / Pagadas / Vencidas  
-**Búsqueda:** Por número, proveedor, cliente (live filtering)  
-**Cards:** número, proveedor, fecha, total, badge de estado, vencimiento  
-**Resumen:** totales, pendientes, pagadas, monto pendiente  
-**FAB:** botón "+" → navega a Upload
+**Agrupación:** Por mes (default) | Por proveedor | Sin agrupar  
+**Ordenamiento:** Más reciente | Más antiguo | Mayor monto | Menor monto  
+**Filtros de estado:** Todos / Pendientes / Pagadas / Vencidas (chips)  
+**Filtros de rango:** Todo / Este mes / Mes pasado / 90 días (chips secundarios)  
+**Búsqueda:** Por número, proveedor, NIT (live, Signals)  
+**Resumen reactivo:** card superior con total, pendientes, pagadas, vencidas y monto por pagar  
+**Sticky headers** de grupo mientras scrolleas  
+**Loading:** skeletons shimmer (no spinner)  
+**Empty states:** diferenciados — sin data (CTA subir) vs. sin resultados (CTA limpiar filtros)
 
-**Estado:** Implementado (UI + lógica de filtros + llamada a Supabase).
+**Filtro de lote:** Si llega con `?lote=id1,id2,id3`, filtra solo esas facturas.
+Muestra chip "Salir del lote" para volver a la vista completa.
+
+**Arquitectura:** todo via Signals + computed (Angular 20). Helper puro `agrupar-facturas.ts`.
+
+**Estado:** Reescrita en Fase 1.5. Fully functional.
 
 ---
 
@@ -235,7 +257,15 @@ Vista completa de una factura individual con gestión de pago.
 
 **Formas de pago:** Transferencia / Efectivo / Cheque / Tarjeta / PSE
 
-**Estado:** Implementado (UI + llamadas al servicio).
+**Navegación contextual:** Lee queryParam `?from=lote`. Si viene de un lote (upload masiva),
+el back-button navega a `/upload`. Si no, navega a `/facturas`.
+Método `goBack()` centraliza la lógica.
+
+**Loading:** Skeletons inline (banner + hero + grid + cards) en lugar de spinner.
+`cargando` y `mostrarModalPago` como Signals.
+Control flow moderno: `@if` / `@for` (Angular 17+).
+
+**Estado:** Implementado y modernizado en Fase 1.5. Pendiente: edición de campos (B7).
 
 ---
 
@@ -455,28 +485,32 @@ kubectl logs -n pyme-test deployment/worker-ocr
 ## Estado de Implementación
 
 ### Implementado ✅
-- Home page (dashboard de desarrollo con estado del equipo)
+- Home page (dashboard de desarrollo con IP dinámica desde environment.workerUrl)
 - Onboarding completo (7 pasos, scoring, perfiles)
-- Upload page (UI + integración con worker-ocr)
-- Facturas page (lista, filtros, búsqueda)
-- Detalle page (vista completa, modal de pago, compartir, CUFE)
+- Upload page (rediseño iPhone dark: back-button, segmento accent, radios 16-24px)
+- Upload page: card "Revisar N facturas" → navega a lote en facturas.page
+- Facturas page (reescrita Fase 1.5: agrupación/orden/filtros/skeletons/lote)
+- Detalle page (navegación contextual, Signals, skeletons, @if/@for)
 - Servicio `factura.ts` (HTTP client completo)
+- Servicio `sesion-carga.service.ts` (signal del lote actual)
+- Util `agrupar-facturas.ts` (helper puro: agrupa/ordena facturas)
+- Componente `SbSkeletonComponent` (card/row/block, shimmer con sb-tokens)
 - worker-ocr: parse XML DIAN (incluyendo AttachedDocument)
-- worker-ocr: OCR con Gemini 1.5 Pro
+- worker-ocr: OCR con Groq (Llama 70B texto + Llama 4 Scout visión)
 - worker-ocr: persistencia en Supabase (6 tablas en cascada)
 - Dockerfile para worker-ocr
 - K8s manifest (Deployment + Service)
 - VM GCP provisionada con minikube + n8n
 
 ### En Progreso / Pendiente ⏳
+- Onboarding page redesign (estilo iPhone dark, motion en transiciones de paso)
+- Edición de campos extraídos en detalle.page (modo edit + PATCH Supabase) — B7
 - Verificación comunicación n8n ↔ worker-ocr
 - Primer workflow n8n configurado
 - Integración completa Supabase (RLS por usuario)
 - Guardar perfil de onboarding en tabla `perfil_extraccion`
 - Autenticación de usuarios (Supabase Auth)
 - Analíticas / dashboard (Capa 3) — 10% completado
-- Migración a GKE para producción
-- Convertir URLs hardcodeadas a variables de entorno
 
 ### No comenzado ❌
 - Módulo de analíticas / reportes
@@ -511,16 +545,26 @@ kubectl logs -n pyme-test deployment/worker-ocr
 ### Estado de páginas
 | Página | Estado visual |
 |---|---|
-| `home` | ✅ Rediseñada (stat grid, nav cards, status dots, DM Sans/Outfit) |
-| `upload` | ⏳ Funcional, rediseño pendiente |
-| `facturas` | ⏳ Funcional, rediseño pendiente |
-| `detalle` | ⏳ Funcional, rediseño pendiente |
-| `onboarding` | ⏳ Funcional, rediseño pendiente |
+| `home` | ✅ Rediseñada (stat grid, nav cards, status dots, DM Sans/Outfit, IP dinámica) |
+| `upload` | ✅ Rediseñada (back-button, segmento accent, radios 16-24px, card "Revisar lote") |
+| `facturas` | ✅ Reescrita (agrupación/filtros/skeletons, resumen reactivo, lote contextual) |
+| `detalle` | ✅ Modernizada (skeletons, @if/@for, Signals, back contextual) |
+| `onboarding` | ⏳ Funcional pero sin rediseño iPhone dark — próxima sesión |
 
 **Modelos de src/app/models/:**
 - `factura.model.ts` — interfaces de BD (Factura, FacturaItem, etc.)
 - `worker-ocr.model.ts` — RespuestaProcesar, ProcesamientoResultado, FiltrosFactura
 - `archivo-en-proceso.model.ts` — ArchivoEnProceso (estado de cada archivo en carga masiva)
+
+**Servicios de src/app/services/:**
+- `factura.ts` — HTTP client (worker-ocr + Supabase REST)
+- `sesion-carga.service.ts` — signal del lote actual (facturaIds del batch en curso)
+
+**Utils de src/app/utils/:**
+- `agrupar-facturas.ts` — helper puro sin deps Angular: agrupa, ordena, formatea subtítulos
+
+**Componentes de src/app/components/:**
+- `sb-skeleton/` — SbSkeletonComponent standalone (variantes card/row/block, shimmer sb-tokens)
 
 ---
 

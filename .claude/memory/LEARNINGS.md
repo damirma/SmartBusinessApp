@@ -30,6 +30,20 @@
 **Fix:** Quitar `,pagos(*)` del select — columnas estado/fecha_pago van directo en `facturas`
 **Resuelto en Fase 0**
 
+## 2026-06-02 — Intl.NumberFormat notation:'compact' no existe en tsconfig lib:es2018
+**Causa:** El proyecto usa `"lib": ["es2018", "dom"]` en tsconfig. La propiedad `notation` en `Intl.NumberFormatOptions` fue añadida a los tipos TypeScript en es2020. El `as any` cast falla en el compilador AOT de Angular (el Angular compiler es más estricto que `tsc --noEmit`).
+**Fix:** No usar `notation: 'compact'` — implementar helper manual `compactCOP(amount)` con ifs para B/M/K.
+**Código:** `src/app/utils/agrupar-facturas.ts`, función `compactCOP()`
+**Nota:** `tsc --noEmit` pasó sin error pero el browser dev server (esbuild AOT) sí falló. Siempre verificar en browser, no solo con tsc.
+
+## 2026-06-02 — Subagentes en paralelo: evitar que 2 agentes toquen el mismo archivo
+**Causa:** Al lanzar 3 subagentes en paralelo, inicialmente el plan tenía A y D tocando detalle.page.ts/.html, y B y D tocando facturas.page.ts. Habría causado race conditions o sobrescrituras.
+**Fix:** Asignar propiedad exclusiva de archivos a cada subagente antes de lanzar: A → detalle + upload + SesionCargaService; B → facturas + agrupar-facturas; D → solo el nuevo componente SbSkeleton.
+
+## 2026-06-02 — ion-back-button no muestra texto en iOS por defecto
+**Causa:** Por defecto `ion-back-button` muestra el título de la página anterior en iOS. Para mantener solo el ícono de flecha usar `text=""` en el atributo.
+**Fix:** `<ion-back-button defaultHref="/home" text=""></ion-back-button>`
+
 ## 2026-06-02 — socat se cae si minikube reinicia primero
 **Causa:** systemd inicia socat antes de que `minikube ip` resuelva
 **Fix:** ExecStartPre con loop `until minikube ip succeeds`
