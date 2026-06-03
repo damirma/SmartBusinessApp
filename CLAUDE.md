@@ -1,12 +1,12 @@
-/# SmartBusinessApp — CLAUDE.md
+# SmartBusinessApp — CLAUDE.md
 
-Documento de contexto completo para Claude Code. Actualizado: 2026-06-02 (sesión 2).
+Documento de contexto completo para Claude Code. Actualizado: 2026-06-03 (sesión 3).
 
 ---
 
 ## ¿Qué es este proyecto?
 
-**SmartBusiness OCR Suite** es una plataforma SaaS de OCR/IDP (Intelligent Document Processing) para facturas electrónicas colombianas en formato DIAN. Su objetivo es ayudar a PyMEs a digitalizar, extraer y gestionar datos de facturas (XML UBL 2.1 y PDF/imagen) con procesamiento IA vía Gemini.
+**SmartBusiness OCR Suite** es una plataforma SaaS de OCR/IDP (Intelligent Document Processing) para facturas electrónicas colombianas en formato DIAN. Su objetivo es ayudar a PyMEs a digitalizar, extraer y gestionar datos de facturas (XML UBL 2.1 y PDF/imagen) con procesamiento IA vía Groq.
 
 **Contexto académico:**
 - Materia: Proyecto de Investigación II — ETITC Bogotá (Escuela Tecnológica Instituto Técnico Central)
@@ -44,26 +44,34 @@ Documento de contexto completo para Claude Code. Actualizado: 2026-06-02 (sesió
 **Modo:** Standalone Components (Angular 14+, sin NgModules). Todos los componentes usan `standalone: true`.  
 **Capacitor appId:** `com.smartbusiness.app`
 
-### Backend (worker-ocr)
+### Backend (worker-ocr) — v5.0
 | Tecnología | Versión | Rol |
 |---|---|---|
 | Python | 3.11 | Runtime |
 | Flask | 3.0.3 | HTTP server |
 | flask-cors | 4.0.1 | CORS (sin restricciones) |
-| google-generativeai | 0.8.3 | Gemini Vision API |
+| groq | latest | Groq API client |
+| markitdown | latest | Conversión PDF→Markdown (PDFs con texto nativo) |
 | supabase | 2.15.0 | Cliente Supabase |
 | requests | 2.32.3 | HTTP cliente auxiliar |
 
-**Modelo IA:** Groq — `llama-3.3-70b` (texto/PDF vía markitdown) + `meta-llama/llama-4-scout` (visión/imágenes). **Migrado de Gemini en Fase 0.**
+**Modelos IA (Groq):**
+- Texto/PDF nativo: `llama-3.3-70b-versatile` (vía markitdown → markdown → Groq)
+- Visión/imágenes/PDF escaneado: `llama-4-scout-17b-16e-instruct` (multimodal)
+
+**Migrado de Gemini en Fase 0. Secret K8s es `GROQ_API_KEY`, no `GEMINI_API_KEY`.**
 
 ### Infraestructura
 | Componente | Detalle |
 |---|---|
 | Cloud | GCP VM `dam01` — e2-medium, Debian 12, `us-east1-b` |
-| IP pública | `146.148.80.200` (**estática**, reservada en Fase 0) |
-| Dominio | `smartbusinessdam.sytes.net` → `146.148.80.200` |
+| IP pública | `146.148.80.200` (**estática**, reservada como `smartbusiness-ip`) |
+| Dominio principal | `damirsmartbuss.hopto.org` → `146.148.80.200` (HTTPS via Let's Encrypt) |
+| Dominio alternativo | `smartbusinessdam.sytes.net` → `146.148.80.200` |
+| HTTPS | Let's Encrypt en `damirsmartbuss.hopto.org` |
 | Kubernetes | minikube single-node en la VM |
 | Orquestación | n8n v2.15.0 en namespace `infraestructura` |
+| Bot Telegram | @Konda_V1 — conectado via n8n (debugging en progreso) |
 | Base de datos | Supabase (PostgreSQL + RLS) |
 | Container registry | Docker local en minikube (`worker-ocr:latest`) |
 | Namespace K8s app | `pyme-test` |
@@ -76,6 +84,7 @@ Documento de contexto completo para Claude Code. Actualizado: 2026-06-02 (sesió
 SmartBusinessApp/
 ├── CLAUDE.md                    ← este archivo
 ├── README.md                    ← documentación técnica del proyecto
+├── ROADMAP.md                   ← roadmap del proyecto
 ├── package.json                 ← dependencias npm
 ├── angular.json                 ← config Angular CLI (output: www/)
 ├── ionic.config.json            ← type: angular-standalone
@@ -87,16 +96,17 @@ SmartBusinessApp/
 ├── .gitignore                   ← excluye www/, dist/, node_modules/
 │
 ├── src/
-│   ├── main.ts                  ← bootstrap standalone con provideHttpClient()
+│   ├── main.ts                  ← bootstrap standalone con provideHttpClient() + registerLocaleData(es-CO)
 │   ├── index.html
-│   ├── global.scss
+│   ├── global.scss              ← DM Sans + Outfit + JetBrains Mono (Google Fonts)
 │   ├── polyfills.ts
 │   ├── zone-flags.ts
 │   ├── environments/
-│   │   ├── environment.ts       ← production: false
+│   │   ├── environment.ts       ← production: false, workerUrl, supabaseUrl, supabaseKey
 │   │   └── environment.prod.ts  ← production: true
 │   ├── theme/
-│   │   └── variables.scss       ← variables CSS de Ionic
+│   │   ├── variables.scss       ← variables CSS de Ionic
+│   │   └── tokens.scss          ← design tokens --sb-accent, --sb-bg-*, --sb-font-*
 │   └── app/
 │       ├── app.component.ts     ← root, solo <ion-app>+<ion-router-outlet>
 │       ├── app.component.html
@@ -109,13 +119,19 @@ SmartBusinessApp/
 │       │   └── home.page.scss
 │       │
 │       ├── pages/
-│       │   ├── onboarding/      ← perfil de PyME (7 pasos)
+│       │   ├── onboarding/      ← perfil de PyME (7 pasos, guarda en Supabase)
 │       │   ├── upload/          ← subida y procesamiento de facturas
-│       │   ├── facturas/        ← lista con filtros
-│       │   └── detalle/         ← vista completa + pago
+│       │   ├── facturas/        ← lista con filtros, agrupación, badge Corregido
+│       │   └── detalle/         ← vista completa + pago + edición 5 campos
 │       │
 │       ├── components/
 │       │   └── sb-skeleton/     ← SbSkeletonComponent standalone (card/row/block + shimmer)
+│       │
+│       ├── models/
+│       │   ├── factura.model.ts         ← interfaces BD (Factura, FacturaItem, etc.)
+│       │   ├── worker-ocr.model.ts      ← RespuestaProcesar, ProcesamientoResultado, FiltrosFactura
+│       │   ├── archivo-en-proceso.model.ts ← ArchivoEnProceso (estado carga masiva)
+│       │   └── index.ts                 ← re-exports
 │       │
 │       ├── utils/
 │       │   └── agrupar-facturas.ts ← helper puro: agrupa/ordena facturas por mes o proveedor
@@ -124,13 +140,17 @@ SmartBusinessApp/
 │           ├── factura.ts       ← HTTP client (worker-ocr + Supabase REST)
 │           └── sesion-carga.service.ts ← signal del lote de facturas procesadas en el batch
 │
-├── worker-ocr/                  ← microservicio Python
-│   ├── main.py                  ← Flask app, 334 líneas
+├── worker-ocr/                  ← microservicio Python v5.0
+│   ├── main.py                  ← Flask app
 │   ├── requirements.txt
 │   └── Dockerfile               ← FROM python:3.11-slim, EXPOSE 8080
 │
 ├── k8s/
 │   └── worker-ocr.yaml          ← Deployment + ClusterIP Service
+│
+├── smartbusiness-core/          ← Claude Code skill personalizada
+├── ionic-feature-builder/       ← Claude Code skill personalizada
+├── tools/                       ← scripts de utilidad
 │
 └── test_facturas/
     └── XML_BEC472892161.xml     ← factura real DIAN para pruebas (53KB)
@@ -174,7 +194,7 @@ Panel de estado del equipo y del proyecto. Muestra:
 - Barras de progreso por capa: OCR, Storage, Analytics, App
 - Equipo (Erik, Samuel, Juan Pablo) + footer con rama git
 
-**Estado:** Rediseñado (2026-06-02) con DM Sans + Outfit + sistema visual nuevo. Es la pantalla inicial por defecto.
+**Estado:** ✅ Rediseñado con DM Sans + Outfit + sistema visual nuevo. IP dinámica desde `environment.workerUrl`.
 
 ---
 
@@ -192,9 +212,11 @@ Cuestionario multi-step para configurar el perfil de extracción de la empresa. 
 
 **Perfiles calculados:** Auditable/Tributario · Servicios · Activos Fijos · Inventario/Comercio · Insumos/Producción · Mixto Adaptativo
 
-**Persistencia:** `sessionStorage` (no Supabase todavía).
+**UI:** Barra de progreso segmentada (7 pills CSS), animaciones `slideInForward`/`slideInBack` entre pasos.
 
-**Estado:** Implementado (UI + lógica de scoring). Pendiente: guardar perfil en tabla `perfil_extraccion` de Supabase.
+**Persistencia:** `finalizarOnboarding()` llama `FacturaService.guardarPerfil()` → POST a tabla `perfil_extraccion` en Supabase. Usa `pyme_id: 'default'` hasta que exista auth real.
+
+**Estado:** ✅ Implementado y funcional. Pendiente: rediseño visual iPhone dark.
 
 ---
 
@@ -218,11 +240,11 @@ Interfaz principal de carga de facturas. Dos modos coexisten via `IonSegment`:
 **Lote contextual:** `SesionCargaService` (signal) mantiene los IDs del batch actual.
 Al iniciar un nuevo batch: `iniciarLote()`. Al navegar al detalle: `?from=lote` en queryParam.
 
-**Estado:** Implementado y rediseñado. Requiere worker-ocr en `146.148.80.200:30080`.
+**Estado:** ✅ Implementado y rediseñado. Requiere worker-ocr en `146.148.80.200:30080`.
 
 ---
 
-### `pages/facturas/` — Lista de Facturas (reescrita en Fase 1.5)
+### `pages/facturas/` — Lista de Facturas
 Vista inteligente de facturas con agrupación, ordenamiento y filtros múltiples.
 
 **Agrupación:** Por mes (default) | Por proveedor | Sin agrupar  
@@ -232,28 +254,40 @@ Vista inteligente de facturas con agrupación, ordenamiento y filtros múltiples
 **Búsqueda:** Por número, proveedor, NIT (live, Signals)  
 **Resumen reactivo:** card superior con total, pendientes, pagadas, vencidas y monto por pagar  
 **Sticky headers** de grupo mientras scrolleas  
+**Badge "Corregido":** chip azul en card cuando `f.editado_por_usuario === true`  
 **Loading:** skeletons shimmer (no spinner)  
 **Empty states:** diferenciados — sin data (CTA subir) vs. sin resultados (CTA limpiar filtros)
 
 **Filtro de lote:** Si llega con `?lote=id1,id2,id3`, filtra solo esas facturas.
 Muestra chip "Salir del lote" para volver a la vista completa.
 
+**Refresh:** `ionViewWillEnter` refresca la lista al volver de detalle (no solo `ngOnInit`).
+
 **Arquitectura:** todo via Signals + computed (Angular 20). Helper puro `agrupar-facturas.ts`.
 
-**Estado:** Reescrita en Fase 1.5. Fully functional.
+**Estado:** ✅ Reescrita. Fully functional.
 
 ---
 
 ### `pages/detalle/` — Detalle de Factura
-Vista completa de una factura individual con gestión de pago.
+Vista completa de una factura individual con gestión de pago y edición de campos.
 
 **Secciones:** Banner de estado · Hero (número/proveedor/NIT) · Grid de datos · Tabla de ítems · Tabla de impuestos · Tarjeta de totales · Sección CUFE · Info de pago
 
 **Acciones:**
 - Marcar como pagada (modal: fecha + forma de pago)
 - Desmarcar pago
-- Compartir resumen (Web Share API / clipboard fallback)
+- Compartir resumen (Web Share API / clipboard fallback con toast)
 - Copiar CUFE
+- Editar campos extraídos (botón lápiz en toolbar)
+
+**Edición de campos (modo edición):**
+- Activa `modoEdicion` signal con botón lápiz en toolbar
+- Campos editables: `numero`, `proveedor_nombre`, `proveedor_nit`, `total_pagar`, `fecha_emision`
+- Footer sticky con botones Cancelar / Guardar
+- Al guardar: `FacturaService.actualizarCampos()` hace PATCH a Supabase con `editado_por_usuario: true`
+- Badge azul "Corregido" aparece en el banner cuando `editado_por_usuario === true`
+- Acciones (pagar / compartir) se ocultan durante la edición
 
 **Formas de pago:** Transferencia / Efectivo / Cheque / Tarjeta / PSE
 
@@ -265,7 +299,7 @@ Método `goBack()` centraliza la lógica.
 `cargando` y `mostrarModalPago` como Signals.
 Control flow moderno: `@if` / `@for` (Angular 17+).
 
-**Estado:** Implementado y modernizado en Fase 1.5. Pendiente: edición de campos (B7).
+**Estado:** ✅ Implementado, modernizado y con edición de campos completa.
 
 ---
 
@@ -289,19 +323,21 @@ supabaseKey = environment.supabaseKey
 | `getFacturas(filtros?)` | SELECT * FROM facturas (con filtros opcionales) |
 | `getFactura(id)` | SELECT factura + items + impuestos (JOIN) |
 | `actualizarEstado(id, estado, fechaPago?)` | PATCH estado de pago |
+| `actualizarCampos(id, campos)` | PATCH campos editables + setea `editado_por_usuario: true` |
+| `guardarPerfil(pyme_id, perfil)` | POST a `perfil_extraccion` con `Prefer: return=minimal` |
 
 **Retorna Observables** (no Promises). Usar `subscribe()` o `async pipe` en templates.
 
 ---
 
-## Backend — `worker-ocr/main.py`
+## Backend — `worker-ocr/main.py` (v5.0)
 
 Flask app en puerto 8080. Configura CORS sin restricciones.
 
 ### Endpoints
 
 ```
-GET  /health     → {"status":"ok","version":"3.0"}
+GET  /health     → {"status":"ok","version":"5.0"}
 POST /procesar   → {"ok":true,"guardado":{...},"data":{...}}
 ```
 
@@ -310,14 +346,14 @@ POST /procesar   → {"ok":true,"guardado":{...},"data":{...}}
 // Opción A — XML
 {"xml_content": "<Invoice>...</Invoice>"}
 
-// Opción B — Imagen o PDF
+// Opción B — Imagen o PDF escaneado
 {"imagen_b64": "<base64>", "mime_type": "image/jpeg"}
 ```
 
 ### Output /procesar
 ```json
 {
-  "fuente": "xml | imagen_gemini",
+  "fuente": "xml | imagen_groq",
   "procesado_en": "ISO8601",
   "documento": {
     "numero", "tipo", "cufe", "fecha_emision", "hora_emision",
@@ -335,14 +371,15 @@ POST /procesar   → {"ok":true,"guardado":{...},"data":{...}}
 ```
 
 ### Funciones internas clave
-- `parse_xml(xml_content)` — Parser de XML DIAN. Soporta Invoice directo Y AttachedDocument (el Invoice real va en CDATA dentro de `cbc:Description` — hay que extraerlo antes de parsear).
+- `parse_xml(xml_content)` — Parser XML DIAN. Soporta Invoice directo Y AttachedDocument (Invoice real en CDATA dentro de `cbc:Description`).
 - `parse_party(node)` — Extrae datos de parte (proveedor/cliente) desde nodo XML.
-- `parse_imagen_groq(imagen_b64, mime_type, api_key)` — Llama Groq Llama 4 Scout (visión) con prompt en español, espera JSON puro. PDFs con texto nativo van por Llama 3 70B vía markitdown.
+- `parse_imagen_groq(imagen_b64, mime_type, api_key)` — Llama Groq `llama-4-scout-17b-16e-instruct` (visión) con prompt en español, espera JSON puro.
+- `parse_pdf_texto(pdf_bytes, api_key)` — PDF con texto nativo: markitdown → markdown → Groq `llama-3.3-70b-versatile`.
 - `guardar_en_supabase(data)` — Inserta en 6 tablas en cascada: pymes → facturas → factura_items → factura_impuestos → autorizaciones_dian → procesamiento_log.
 
 ### Variables de entorno requeridas (K8s secret `worker-ocr-secret`)
 ```
-GROQ_API_KEY       ← reemplaza GEMINI_API_KEY desde Fase 0
+GROQ_API_KEY
 SUPABASE_URL
 SUPABASE_KEY
 ```
@@ -366,9 +403,15 @@ SUPABASE_KEY
 - Puerto: 80 → 8080
 - DNS interno: `worker-ocr-svc.pyme-test.svc.cluster.local`
 
-**Acceso externo:** NodePort `30080` expuesto en la VM → `146.148.80.200:30080`
+**Acceso externo:** NodePort `30080` expuesto en la VM via socat (systemd service) → `146.148.80.200:30080`
 
-**n8n:** Namespace `infraestructura`. Actúa como thin orchestrator — la lógica pesada de OCR va en worker-ocr, n8n solo orquesta flujos.
+**n8n:** Namespace `infraestructura`. Actúa como thin orchestrator — la lógica OCR va en worker-ocr, n8n orquesta flujos.
+
+### Workflows n8n activos
+| Workflow | Estado |
+|---|---|
+| Router Factura | Publicado |
+| Bot Telegram Facturas | Publicado (debugging @Konda_V1) |
 
 ---
 
@@ -380,7 +423,7 @@ SUPABASE_KEY
 | Tabla | Descripción |
 |---|---|
 | `pymes` | Empresas registradas (NIT, nombre, plan) |
-| `facturas` | Cabecera de facturas procesadas + raw_json |
+| `facturas` | Cabecera de facturas + raw_json + `editado_por_usuario` boolean |
 | `factura_items` | Líneas de detalle de cada factura |
 | `factura_impuestos` | Impuestos (IVA, ReteIVA, ICA, etc.) por factura |
 | `autorizaciones_dian` | Número de resolución DIAN + rango |
@@ -388,7 +431,23 @@ SUPABASE_KEY
 | `usuarios` | Usuarios de la plataforma |
 | `perfil_extraccion` | Resultados del onboarding por PyME |
 
+**Notas de schema importantes:**
+- La tabla `pagos` NO existe — el pago se guarda en `facturas.fecha_pago` y `facturas.forma_pago`
+- Campo edición: `facturas.editado_por_usuario` (boolean)
+- Campo `numero` en Supabase puede ser `numero_factura` — verificar antes de hacer PATCH
+
 **RLS activado.** El frontend usa la anon key directamente (sin JWT de usuario). Pendiente: implementar autenticación y políticas RLS por usuario.
+
+---
+
+## Bot Telegram — @Konda_V1
+
+Bot de Telegram conectado via n8n para consulta de facturas y notificaciones.
+
+- **Handle:** @Konda_V1
+- **Integración:** Workflow n8n "Bot Telegram Facturas" (publicado)
+- **Estado:** Debugging en progreso (Fase 2)
+- **Funcionalidad prevista:** Consultar facturas por número/proveedor, recibir alertas de vencimiento, enviar facturas para procesar
 
 ---
 
@@ -413,6 +472,8 @@ SUPABASE_KEY
 - Formularios: Reactive Forms (no template-driven)
 - `trackBy` en todos los `*ngFor` con listas
 - Seguir patrón existente al generar páginas: `ng generate page pages/<nombre>`
+- `ionViewWillEnter` para refrescar datos al volver a una página (no solo `ngOnInit`)
+- Locale: `registerLocaleData(localeEsCO)` + `LOCALE_ID: 'es-CO'` en `main.ts` (ya configurado)
 
 ### Python / worker-ocr
 - Un solo archivo `main.py` (no fragmentar en módulos por ahora)
@@ -428,7 +489,7 @@ SUPABASE_KEY
 
 ## PDFs — Conversión con markitdown
 
-Para procesar PDFs antes de enviar a Gemini, usar **markitdown** de Microsoft:
+Para PDFs con texto nativo, usar **markitdown** de Microsoft antes de enviar a Groq:
 
 ```bash
 pip install markitdown
@@ -439,10 +500,10 @@ from markitdown import MarkItDown
 md = MarkItDown()
 result = md.convert("factura.pdf")
 markdown_text = result.text_content
-# Luego enviar markdown_text a Gemini como texto, no como imagen
+# Enviar markdown_text a llama-3.3-70b-versatile como texto
 ```
 
-Esto reduce tokens de Gemini y mejora la extracción en PDFs con texto nativo.
+Para PDFs escaneados o imágenes: enviar como base64 a `llama-4-scout-17b-16e-instruct` (visión).
 
 ---
 
@@ -465,7 +526,7 @@ npx cap open android
 # worker-ocr local
 cd worker-ocr
 pip install -r requirements.txt
-$env:GEMINI_API_KEY="..."
+$env:GROQ_API_KEY="..."
 $env:SUPABASE_URL="..."
 $env:SUPABASE_KEY="..."
 python main.py         # escucha en :8080
@@ -484,36 +545,50 @@ kubectl logs -n pyme-test deployment/worker-ocr
 
 ## Estado de Implementación
 
-### Implementado ✅
+### Fase 1 — COMPLETA ✅
+
+#### Frontend
 - Home page (dashboard de desarrollo con IP dinámica desde environment.workerUrl)
-- Onboarding completo (7 pasos, scoring, perfiles)
-- Upload page (rediseño iPhone dark: back-button, segmento accent, radios 16-24px)
-- Upload page: card "Revisar N facturas" → navega a lote en facturas.page
-- Facturas page (reescrita Fase 1.5: agrupación/orden/filtros/skeletons/lote)
-- Detalle page (navegación contextual, Signals, skeletons, @if/@for)
-- Servicio `factura.ts` (HTTP client completo)
+- Onboarding completo (7 pasos, scoring, perfiles, barra segmentada, animaciones, guarda en Supabase)
+- Upload page (individual + masiva, lote contextual, card "Revisar N facturas")
+- Facturas page (agrupación/orden/filtros/skeletons/lote/badge Corregido, refresh ionViewWillEnter)
+- Detalle page (navegación contextual, Signals, skeletons, @if/@for, edición 5 campos, badge Corregido)
+- Servicio `factura.ts` (HTTP client completo: procesarXML/Imagen/Archivo, CRUD, actualizarCampos, guardarPerfil)
 - Servicio `sesion-carga.service.ts` (signal del lote actual)
 - Util `agrupar-facturas.ts` (helper puro: agrupa/ordena facturas)
 - Componente `SbSkeletonComponent` (card/row/block, shimmer con sb-tokens)
-- worker-ocr: parse XML DIAN (incluyendo AttachedDocument)
-- worker-ocr: OCR con Groq (Llama 70B texto + Llama 4 Scout visión)
-- worker-ocr: persistencia en Supabase (6 tablas en cascada)
+- Locale `es-CO` configurado en `main.ts`
+
+#### Backend / Infra
+- worker-ocr v5.0: parse XML DIAN (incluyendo AttachedDocument)
+- worker-ocr v5.0: OCR con Groq (`llama-3.3-70b-versatile` texto + `llama-4-scout-17b-16e-instruct` visión)
+- worker-ocr v5.0: persistencia en Supabase (6 tablas en cascada)
 - Dockerfile para worker-ocr
 - K8s manifest (Deployment + Service)
 - VM GCP provisionada con minikube + n8n
+- IP estática `146.148.80.200` reservada como `smartbusiness-ip`
+- HTTPS via Let's Encrypt en `damirsmartbuss.hopto.org`
 
-### En Progreso / Pendiente ⏳
-- Onboarding page redesign (estilo iPhone dark, motion en transiciones de paso)
-- Edición de campos extraídos en detalle.page (modo edit + PATCH Supabase) — B7
-- Verificación comunicación n8n ↔ worker-ocr
-- Primer workflow n8n configurado
-- Integración completa Supabase (RLS por usuario)
-- Guardar perfil de onboarding en tabla `perfil_extraccion`
-- Autenticación de usuarios (Supabase Auth)
-- Analíticas / dashboard (Capa 3) — 10% completado
+### Fase 2 — EN PROGRESO ⏳
+
+| Tarea | Estado |
+|---|---|
+| Bot Telegram @Konda_V1 | Debugging (workflow publicado, conectividad en revisión) |
+| Workflow n8n Router Factura | Publicado |
+| Analíticas / Dashboard financiero | Pendiente (0%) |
+| Gráfico gastos por mes (últimos 6 meses) | Pendiente |
+| Top 5 proveedores por monto | Pendiente |
+| Resumen tributario (IVA, retenciones) | Pendiente |
+| KPIs: promedio por factura, días de pago | Pendiente |
+
+### Deuda técnica conocida
+- Campo `numero` en Supabase podría ser `numero_factura` — verificar schema antes de PATCH
+- `guardarPerfil` usa `pyme_id: 'default'` hasta que exista auth real
+- RLS en `perfil_extraccion` puede bloquear INSERT con anon key — verificar
+- Onboarding: rediseño visual iPhone dark pendiente
 
 ### No comenzado ❌
-- Módulo de analíticas / reportes
+- Autenticación de usuarios (Supabase Auth)
 - Integración con sistemas contables (Siigo, World Office)
 - Notificaciones push
 - Modo offline / sync
@@ -523,7 +598,8 @@ kubectl logs -n pyme-test deployment/worker-ocr
 
 ## Sistema Visual (Design System)
 
-**Plugin:** `frontend-design` (Claude Code plugin oficial) — referencia para todas las páginas.  
+**Skill:** `ionic-design-system` — referencia para todas las páginas.  
+**Plugin:** `frontend-design` (Claude Code plugin oficial) — generación de UI de alta calidad.  
 **Estética objetivo:** Linear / Vercel / Stripe / Raycast — dark theme profundo, un solo acento, tipografía con carácter.
 
 ### Tokens (`src/theme/tokens.scss`)
@@ -542,29 +618,28 @@ kubectl logs -n pyme-test deployment/worker-ocr
 | `--sb-font-family-display` | `Outfit` | Headings, títulos grandes |
 | `--sb-font-family-mono` | `JetBrains Mono` | IDs, URLs, datos numéricos |
 
-### Estado de páginas
+### Estado visual de páginas
 | Página | Estado visual |
 |---|---|
 | `home` | ✅ Rediseñada (stat grid, nav cards, status dots, DM Sans/Outfit, IP dinámica) |
 | `upload` | ✅ Rediseñada (back-button, segmento accent, radios 16-24px, card "Revisar lote") |
-| `facturas` | ✅ Reescrita (agrupación/filtros/skeletons, resumen reactivo, lote contextual) |
-| `detalle` | ✅ Modernizada (skeletons, @if/@for, Signals, back contextual) |
-| `onboarding` | ⏳ Funcional pero sin rediseño iPhone dark — próxima sesión |
+| `facturas` | ✅ Reescrita (agrupación/filtros/skeletons, resumen reactivo, lote contextual, badge Corregido) |
+| `detalle` | ✅ Modernizada (skeletons, @if/@for, Signals, back contextual, edición campos, badge Corregido) |
+| `onboarding` | ⏳ Funcional (barra segmentada, animaciones) pero sin rediseño visual iPhone dark |
 
-**Modelos de src/app/models/:**
-- `factura.model.ts` — interfaces de BD (Factura, FacturaItem, etc.)
-- `worker-ocr.model.ts` — RespuestaProcesar, ProcesamientoResultado, FiltrosFactura
-- `archivo-en-proceso.model.ts` — ArchivoEnProceso (estado de cada archivo en carga masiva)
+---
 
-**Servicios de src/app/services/:**
-- `factura.ts` — HTTP client (worker-ocr + Supabase REST)
-- `sesion-carga.service.ts` — signal del lote actual (facturaIds del batch en curso)
+## Claude Code — Skills y Herramientas
 
-**Utils de src/app/utils/:**
-- `agrupar-facturas.ts` — helper puro sin deps Angular: agrupa, ordena, formatea subtítulos
-
-**Componentes de src/app/components/:**
-- `sb-skeleton/` — SbSkeletonComponent standalone (variantes card/row/block, shimmer sb-tokens)
+| Skill | Activar cuando... |
+|---|---|
+| `ionic-design-system` | Diseñas/rediseñas pantallas, defines tokens, construyes componentes |
+| `dian-xml-parser` | Trabajas con XML DIAN UBL 2.1, parseo AttachedDocument, namespaces |
+| `pdf-processing-pipeline` | Procesas PDFs de facturas, decides texto nativo vs escaneado |
+| `batch-document-processing` | Benchmark corpus 152 facturas, métricas XML vs PDF |
+| `frontend-design` | Construyes componentes web de alta calidad visual |
+| `ionic-feature-builder` | Skill personalizada del proyecto (en `ionic-feature-builder/`) |
+| `smartbusiness-core` | Skill personalizada del proyecto (en `smartbusiness-core/`) |
 
 ---
 
@@ -572,10 +647,7 @@ kubectl logs -n pyme-test deployment/worker-ocr
 
 **Deuda técnica conocida — no es un bug, es estado actual del proyecto académico:**
 
-1. **Credenciales hardcodeadas** en `src/app/services/factura.ts`:
-   - URL del worker: `http://34.45.194.133:30080`
-   - Supabase URL y anon key expuestos en código fuente
-   - Mover a `src/environments/environment.ts` cuando se estabilice la infra
+1. **Credenciales en environment.ts** — URL del worker, Supabase URL y anon key en código fuente. Aceptable para desarrollo académico.
 
 2. **CORS sin restricciones** en worker-ocr (Flask-CORS sin `origins`)
 
@@ -592,22 +664,29 @@ kubectl logs -n pyme-test deployment/worker-ocr
         │                                              │
         │ POST /procesar (XML o imagen_b64)            │ REST (anon key)
         ▼                                              ▼
-[worker-ocr : Flask]                           [Supabase REST API]
+[worker-ocr v5.0 : Flask]                      [Supabase REST API]
   ├── parse_xml()                                ├── facturas
-  ├── parse_imagen_gemini()                      ├── factura_items
-  └── guardar_en_supabase()                      ├── factura_impuestos
-        │                                        ├── pymes
-        │ Gemini 1.5 Pro                         └── procesamiento_log
-        ▼
-  [Google AI API]
+  ├── parse_pdf_texto() → markitdown             ├── factura_items
+  ├── parse_imagen_groq()                        ├── factura_impuestos
+  └── guardar_en_supabase()                      ├── pymes
+        │                                        └── procesamiento_log
+        │ Groq API
+        ├── llama-3.3-70b-versatile    (texto/PDF nativo)
+        └── llama-4-scout-17b-16e-instruct (visión/PDF escaneado)
 
 [n8n : namespace infraestructura]
+  ├── Workflow: Router Factura (publicado)
+  ├── Workflow: Bot Telegram Facturas (publicado, debugging)
   └── orquesta flujos → llama worker-ocr-svc internamente
 
+[Bot Telegram @Konda_V1]
+  └── conectado via n8n → consulta Supabase / llama worker-ocr
+
 [Kubernetes : minikube en GCP dam01]
-  └── namespace pyme-test → Deployment worker-ocr + ClusterIP
+  ├── namespace pyme-test → Deployment worker-ocr + ClusterIP
+  └── IP estática 146.148.80.200 + HTTPS damirsmartbuss.hopto.org
 ```
 
 ---
 
-*Generado por Claude Code el 2026-05-31. Actualizar cuando cambien la infraestructura, rutas, o tablas de BD.*
+*Actualizado por Claude Code el 2026-06-03. Actualizar cuando cambien la infraestructura, rutas, o tablas de BD.*
