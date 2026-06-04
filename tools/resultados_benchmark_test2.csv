@@ -1,0 +1,21 @@
+carpeta,metodo,exactitud_global,ok_numero,ok_cufe,ok_fecha,ok_nit_prov,ok_nombre_prov,ok_nit_cli,ok_total,ok_subtotal,ok_num_items,ok_num_impuestos,tiempo_seg,tokens_entrada,tokens_salida,error,procesado_en
+ad080022966300625000201EA,xml,1.0000,1,1,1,1,1,1,1,1,1,1,0.001,0,0,,2026-06-01T19:53:02.563691Z
+ad080022966300625000201EA,pdf_markdown,0.0000,0,0,0,0,0,0,0,0,0,0,0.000,0,0,"404 NOT_FOUND. {'error': {'code': 404, 'message': 'models/gemini-1.5-flash is not found for API version v1beta, or is no",2026-06-01T19:53:04.147960Z
+ad086000218002725570520250920180108931,xml,1.0000,1,1,1,1,1,1,1,1,1,1,0.002,0,0,,2026-06-01T19:53:04.149888Z
+ad086000218002725570520250920180108931,pdf_markdown,0.0000,0,0,0,0,0,0,0,0,0,0,0.000,0,0,"404 NOT_FOUND. {'error': {'code': 404, 'message': 'models/gemini-1.5-flash is not found for API version v1beta, or is no",2026-06-01T19:54:09.131328Z
+ad0890900943006250139F624,xml,1.0000,1,1,1,1,1,1,1,1,1,1,0.002,0,0,,2026-06-01T19:54:09.522332Z
+ad0890900943006250139F624,pdf_markdown,0.0000,0,0,0,0,0,0,0,0,0,0,0.000,0,0,"404 NOT_FOUND. {'error': {'code': 404, 'message': 'models/gemini-1.5-flash is not found for API version v1beta, or is no",2026-06-01T19:55:14.128184Z
+b63cdff2-933c-4c26-9083-fe5523a19b05,xml,1.0000,1,1,1,1,1,1,1,1,1,1,0.001,0,0,,2026-06-01T19:55:14.129871Z
+b63cdff2-933c-4c26-9083-fe5523a19b05,pdf_markdown,0.0000,0,0,0,0,0,0,0,0,0,0,0.000,0,0,"404 NOT_FOUND. {'error': {'code': 404, 'message': 'models/gemini-1.5-flash is not found for API version v1beta, or is no",2026-06-01T19:56:19.131523Z
+compressed_20251120171927,xml,1.0000,1,1,1,1,1,1,1,1,1,1,0.002,0,0,,2026-06-01T19:56:19.133279Z
+compressed_20251120171927,pdf_markdown,0.0000,0,0,0,0,0,0,0,0,0,0,0.000,0,0,"404 NOT_FOUND. {'error': {'code': 404, 'message': 'models/gemini-1.5-flash is not found for API version v1beta, or is no",2026-06-01T19:57:24.130048Z
+factura_1106861420250701,xml,1.0000,1,1,1,1,1,1,1,1,1,1,0.002,0,0,,2026-06-01T19:57:24.132177Z
+factura_1106861420250701,pdf_markdown,0.0000,0,0,0,0,0,0,0,0,0,0,0.000,0,0,"404 NOT_FOUND. {'error': {'code': 404, 'message': 'models/gemini-1.5-flash is not found for API version v1beta, or is no",2026-06-01T19:58:29.554193Z
+factura_1106952320250801,xml,1.0000,1,1,1,1,1,1,1,1,1,1,0.002,0,0,,2026-06-01T19:58:29.555996Z
+factura_1106952320250801,pdf_markdown,0.0000,0,0,0,0,0,0,0,0,0,0,0.000,0,0,"404 NOT_FOUND. {'error': {'code': 404, 'message': 'models/gemini-1.5-flash is not found for API version v1beta, or is no",2026-06-01T19:59:34.141859Z
+z08000982700112400013106,xml,1.0000,1,1,1,1,1,1,1,1,1,1,0.001,0,0,,2026-06-01T19:59:34.143450Z
+z08000982700112400013106,pdf_markdown,0.0000,0,0,0,0,0,0,0,0,0,0,0.000,0,0,"404 NOT_FOUND. {'error': {'code': 404, 'message': 'models/gemini-1.5-flash is not found for API version v1beta, or is no",2026-06-01T20:00:39.561524Z
+z08000982700112400013373,xml,1.0000,1,1,1,1,1,1,1,1,1,1,0.002,0,0,,2026-06-01T20:00:39.563268Z
+z08000982700112400013373,pdf_markdown,0.0000,0,0,0,0,0,0,0,0,0,0,0.000,0,0,"404 NOT_FOUND. {'error': {'code': 404, 'message': 'models/gemini-1.5-flash is not found for API version v1beta, or is no",2026-06-01T20:01:44.143632Z
+z090005337000425313abde1,xml,1.0000,1,1,1,1,1,1,1,1,1,1,0.002,0,0,,2026-06-01T20:01:44.145665Z
+z090005337000425313abde1,pdf_markdown,0.0000,0,0,0,0,0,0,0,0,0,0,0.000,0,0,"404 NOT_FOUND. {'error': {'code': 404, 'message': 'models/gemini-1.5-flash is not found for API version v1beta, or is no",2026-06-01T20:02:49.136677Z

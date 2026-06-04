@@ -167,7 +167,7 @@ y responde SOLO con JSON válido, sin markdown ni texto extra.
 }
 Valores monetarios sin puntos de miles: 1663200.00
 Campos ausentes dejar como string vacío."""
-    model = genai.GenerativeModel("gemini-1.5-pro")
+    model = genai.GenerativeModel("gemini-2.5-flash")
     response = model.generate_content([
         {"mime_type": mime_type, "data": imagen_b64},
         prompt,

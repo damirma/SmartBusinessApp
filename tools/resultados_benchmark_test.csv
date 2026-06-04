@@ -1,0 +1,6 @@
+carpeta,metodo,exactitud_global,ok_numero,ok_cufe,ok_fecha,ok_nit_prov,ok_nombre_prov,ok_nit_cli,ok_total,ok_subtotal,ok_num_items,ok_num_impuestos,tiempo_seg,tokens_entrada,tokens_salida,error,procesado_en
+1043349766 (1),xml,1.0000,1,1,1,1,1,1,1,1,1,1,0.001,0,0,,2026-06-01T19:34:16.726710Z
+1043349766 (1),pdf_markdown,0.0000,0,0,0,0,0,0,0,0,0,0,0.000,0,0,Rate limit persistente tras 6 reintentos,2026-06-01T19:39:55.109745Z
+26b03f5c-f58a-4b05-952a-ffa8e2722091,xml,1.0000,1,1,1,1,1,1,1,1,1,1,0.002,0,0,,2026-06-01T19:39:55.111576Z
+26b03f5c-f58a-4b05-952a-ffa8e2722091,pdf_markdown,0.0000,0,0,0,0,0,0,0,0,0,0,0.000,0,0,Rate limit persistente tras 6 reintentos,2026-06-01T19:45:54.146199Z
+ad080022966300625000201EA,xml,1.0000,1,1,1,1,1,1,1,1,1,1,0.002,0,0,,2026-06-01T19:45:54.148278Z

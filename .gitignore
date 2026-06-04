@@ -68,3 +68,16 @@ testem.log
 # System files
 .DS_Store
 Thumbs.db
+
+# Secrets — NUNCA commitear
+.env
+.env.local
+.env.*.local
+
+# Claude Code — archivos internos
+.claude/
+memory/
+
+# Python cache
+__pycache__/
+*.pyc

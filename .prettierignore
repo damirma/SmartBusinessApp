@@ -1,0 +1,6 @@
+www/
+dist/
+node_modules/
+.angular/
+*.min.js
+*.min.css

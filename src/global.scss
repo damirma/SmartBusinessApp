@@ -35,3 +35,19 @@
 /* @import "@ionic/angular/css/palettes/dark.always.css"; */
 /* @import "@ionic/angular/css/palettes/dark.class.css"; */
 @import '@ionic/angular/css/palettes/dark.system.css';
+
+// Google Fonts — DM Sans (body), Outfit (display), JetBrains Mono (data)
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+// SmartBusiness design tokens (colores, tipografía, espaciado, utilidades)
+@import 'theme/tokens';
+
+// ── Reset tipográfico global ──────────────────────────────────────
+ion-app, ion-content, ion-header {
+  font-family: var(--sb-font-family);
+}
+
+// ── Scrollbars mínimas ────────────────────────────────────────────
+::-webkit-scrollbar { width: 4px; height: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--sb-border-light); border-radius: 4px; }

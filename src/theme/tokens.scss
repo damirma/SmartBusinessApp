@@ -1,0 +1,190 @@
+// SmartBusiness Design Tokens
+// Importar en global.scss: @use 'theme/tokens';
+// Usar en componentes: var(--sb-accent), var(--sb-bg-card), etc.
+
+:root {
+  // ── Colores de fondo ──────────────────────────────────────────
+  --sb-bg-primary:    #0A0A0F;
+  --sb-bg-card:       #13131A;
+  --sb-bg-input:      #1C1C26;
+  --sb-bg-overlay:    #202030;
+
+  // ── Accent verde (identidad SmartBusiness) ───────────────────
+  --sb-accent:        #2ECC71;
+  --sb-accent-dim:    rgba(46, 204, 113, 0.12);
+  --sb-accent-dark:   #27AE60;
+
+  // ── Colores semánticos ────────────────────────────────────────
+  --sb-success:       #2ECC71;
+  --sb-success-dim:   rgba(46, 204, 113, 0.14);
+  --sb-warning:       #F39C12;
+  --sb-warning-dim:   rgba(243, 156, 18, 0.14);
+  --sb-danger:        #E74C3C;
+  --sb-danger-dim:    rgba(231, 76, 60, 0.14);
+  --sb-info:          #3498DB;
+  --sb-info-dim:      rgba(52, 152, 219, 0.14);
+  --sb-muted:         #3D3D5C;
+
+  // ── Texto ─────────────────────────────────────────────────────
+  --sb-text-primary:  #EEEEF5;
+  --sb-text-secondary:#7A7A9A;
+  --sb-text-accent:   #2ECC71;
+  --sb-text-disabled: #35354F;
+
+  // ── Tipografía ────────────────────────────────────────────────
+  --sb-font-family:        'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+  --sb-font-family-display:'Outfit', 'DM Sans', sans-serif;
+  --sb-font-family-mono:   'JetBrains Mono', 'Fira Code', monospace;
+  --sb-text-xs:    11px;
+  --sb-text-sm:    13px;
+  --sb-text-base:  15px;
+  --sb-text-lg:    18px;
+  --sb-text-xl:    24px;
+  --sb-text-2xl:   32px;
+  --sb-font-normal:   400;
+  --sb-font-medium:   500;
+  --sb-font-semibold: 600;
+  --sb-font-bold:     700;
+
+  // ── Espaciado (escala 4px) ────────────────────────────────────
+  --sb-space-xs:    4px;
+  --sb-space-sm:    8px;
+  --sb-space-md:   16px;
+  --sb-space-lg:   24px;
+  --sb-space-xl:   32px;
+  --sb-space-2xl:  48px;
+
+  // ── Forma ─────────────────────────────────────────────────────
+  --sb-radius-sm:    6px;
+  --sb-radius-md:   12px;
+  --sb-radius-lg:   16px;
+  --sb-radius-xl:   24px;
+  --sb-radius-full: 999px;
+
+  // ── Sombras ───────────────────────────────────────────────────
+  --sb-shadow-card:   0 1px 8px rgba(0, 0, 0, 0.5);
+  --sb-shadow-float:  0 8px 40px rgba(0, 0, 0, 0.7);
+  --sb-shadow-accent: 0 4px 24px rgba(46, 204, 113, 0.22);
+
+  // ── Bordes ────────────────────────────────────────────────────
+  --sb-border-subtle: rgba(255, 255, 255, 0.06);
+  --sb-border-light:  rgba(255, 255, 255, 0.11);
+
+  // ── Transiciones ─────────────────────────────────────────────
+  --sb-transition-fast:   150ms ease;
+  --sb-transition-normal: 200ms ease;
+  --sb-transition-slow:   300ms ease;
+}
+
+// ── Override variables de Ionic con nuestros tokens ──────────────
+:root {
+  --ion-background-color:         var(--sb-bg-primary);
+  --ion-card-background:          var(--sb-bg-card);
+  --ion-item-background:          var(--sb-bg-card);
+  --ion-toolbar-background:       var(--sb-bg-primary);
+  --ion-color-primary:            var(--sb-accent);
+  --ion-color-primary-shade:      var(--sb-accent-dark);
+  --ion-color-primary-tint:       #1DDFA0;
+  --ion-text-color:               var(--sb-text-primary);
+  --ion-text-color-rgb:           240, 240, 240;
+  --ion-border-color:             var(--sb-border-subtle);
+  --ion-tab-bar-background:       var(--sb-bg-card);
+  --ion-tab-bar-border-color:     var(--sb-border-subtle);
+}
+
+// ── Clases utilitarias globales ──────────────────────────────────
+
+// Texto
+.sb-text-primary   { color: var(--sb-text-primary);   }
+.sb-text-secondary { color: var(--sb-text-secondary);  }
+.sb-text-accent    { color: var(--sb-accent);           }
+.sb-text-success   { color: var(--sb-success);          }
+.sb-text-warning   { color: var(--sb-warning);          }
+.sb-text-danger    { color: var(--sb-danger);           }
+
+// Cards
+.sb-card {
+  background:    var(--sb-bg-card);
+  border-radius: var(--sb-radius-lg);
+  border:        1px solid var(--sb-border-subtle);
+  box-shadow:    var(--sb-shadow-card);
+  padding:       var(--sb-space-md);
+}
+
+// Badges de estado de factura
+.sb-badge {
+  display:        inline-flex;
+  align-items:    center;
+  padding:        3px 10px;
+  border-radius:  var(--sb-radius-full);
+  font-size:      var(--sb-text-xs);
+  font-weight:    var(--sb-font-semibold);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  white-space:    nowrap;
+
+  &--pagada    { background: var(--sb-success-dim); color: var(--sb-success); }
+  &--pendiente { background: var(--sb-warning-dim); color: var(--sb-warning); }
+  &--vencida   { background: var(--sb-danger-dim);  color: var(--sb-danger);  }
+  &--procesando{ background: var(--sb-info-dim);    color: var(--sb-info);    }
+}
+
+// Botón primario
+.sb-btn-primary {
+  display:       block;
+  width:         100%;
+  background:    var(--sb-accent);
+  color:         #000;
+  font-weight:   var(--sb-font-bold);
+  font-size:     var(--sb-text-base);
+  border-radius: var(--sb-radius-md);
+  padding:       14px var(--sb-space-lg);
+  border:        none;
+  cursor:        pointer;
+  box-shadow:    var(--sb-shadow-accent);
+  transition:    opacity var(--sb-transition-fast), transform var(--sb-transition-fast);
+
+  &:hover   { opacity: 0.9; }
+  &:active  { opacity: 0.8; transform: scale(0.99); }
+  &:disabled{ opacity: 0.4; cursor: not-allowed; box-shadow: none; }
+}
+
+// Separador de sección
+.sb-section-label {
+  font-size:      var(--sb-text-xs);
+  font-weight:    var(--sb-font-semibold);
+  color:          var(--sb-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin:         var(--sb-space-lg) 0 var(--sb-space-sm);
+  padding:        0 var(--sb-space-md);
+}
+
+// Estado vacío
+.sb-empty-state {
+  display:         flex;
+  flex-direction:  column;
+  align-items:     center;
+  justify-content: center;
+  padding:         var(--sb-space-2xl) var(--sb-space-lg);
+  text-align:      center;
+
+  ion-icon {
+    font-size:     56px;
+    color:         var(--sb-muted);
+    margin-bottom: var(--sb-space-md);
+  }
+
+  &__title {
+    font-size:     var(--sb-text-lg);
+    font-weight:   var(--sb-font-semibold);
+    color:         var(--sb-text-primary);
+    margin:        0 0 var(--sb-space-xs);
+  }
+
+  &__sub {
+    font-size: var(--sb-text-sm);
+    color:     var(--sb-text-secondary);
+    margin:    0 0 var(--sb-space-lg);
+  }
+}
