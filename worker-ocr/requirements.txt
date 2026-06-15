@@ -1,5 +1,6 @@
 flask==3.0.3
 requests==2.32.3
-google-generativeai==0.8.3
+groq>=0.9.0
+markitdown>=0.0.1
 supabase==2.15.0
 flask-cors==4.0.1

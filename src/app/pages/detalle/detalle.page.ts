@@ -5,7 +5,7 @@ import { FormsModule } from '@angular/forms';
 import {
   IonHeader, IonToolbar, IonTitle, IonContent,
   IonButton, IonIcon, IonButtons, IonBackButton,
-  ToastController,
+  ToastController, NavController,
 } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
 import {
@@ -31,6 +31,7 @@ import { Factura } from '../../models';
 export class DetallePage implements OnInit {
   private route          = inject(ActivatedRoute);
   private router         = inject(Router);
+  private navCtrl        = inject(NavController);
   private facturaService = inject(FacturaService);
   private toastCtrl      = inject(ToastController);
 
@@ -71,9 +72,9 @@ export class DetallePage implements OnInit {
 
   goBack(): void {
     if (this.fromLote()) {
-      this.router.navigate(['/upload']);
+      this.navCtrl.navigateBack('/upload');
     } else {
-      this.router.navigate(['/facturas']);
+      this.navCtrl.navigateBack('/facturas');
     }
   }
 

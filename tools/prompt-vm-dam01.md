@@ -1,3 +1,54 @@
+# Prompt para Claude Code — VM dam01 (GCP)
+
+Copia y pega este texto completo como primer mensaje a Claude Code en la VM.
+
+---
+
+## CONTEXTO
+
+Eres Claude Code ejecutándote en la VM `dam01` (GCP, Debian 12). El proyecto es **SmartBusiness OCR Suite**, un microservicio Flask llamado `worker-ocr` que procesa facturas electrónicas colombianas DIAN (XML UBL 2.1 y PDF/imagen) usando Groq como motor de IA.
+
+El worker-ocr corre en Kubernetes (minikube, namespace `pyme-test`). La imagen Docker se construye localmente con el docker de minikube.
+
+**Problema actual:** El archivo `main.py` del worker-ocr está desactualizado — usa la API de Gemini (`google-generativeai`) pero debemos migrar a Groq (`groq`). Además hay un bug: intenta insertar en una tabla `pagos` que no existe en Supabase, lo que causa errores silenciosos.
+
+**Tu misión:** Reemplazar `main.py` y `requirements.txt` con las versiones correctas, reconstruir la imagen Docker y reiniciar el pod en Kubernetes.
+
+---
+
+## PASO 1 — Localizar el proyecto
+
+Primero encuentra dónde está el proyecto:
+
+```bash
+find /home -name "main.py" -path "*/worker-ocr/*" 2>/dev/null
+find /root -name "main.py" -path "*/worker-ocr/*" 2>/dev/null
+```
+
+Una vez que encuentres la ruta (probablemente algo como `/home/dam01/SmartBusinessApp/worker-ocr/` o `/root/SmartBusinessApp/worker-ocr/`), úsala como base para los siguientes pasos.
+
+---
+
+## PASO 2 — Reemplazar `requirements.txt`
+
+Reemplaza el contenido de `requirements.txt` con exactamente esto:
+
+```
+flask==3.0.3
+requests==2.32.3
+groq>=0.9.0
+markitdown>=0.0.1
+supabase==2.15.0
+flask-cors==4.0.1
+```
+
+---
+
+## PASO 3 — Reemplazar `main.py`
+
+Reemplaza el contenido completo de `main.py` con el siguiente código. **No modifiques nada, cópialo exactamente:**
+
+```python
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 import os, re, json, xml.etree.ElementTree as ET, base64, tempfile
@@ -360,7 +411,7 @@ def guardar_en_supabase(data, canal="app"):
         "factura_id": factura_id,
         "pyme_id":    pyme_id,
         "evento":     "factura_procesada",
-        "detalle":    f"Factura {doc.get('numero')} procesada correctamente vía {canal}",
+        "detalle":    f"Factura {doc.get('numero')} procesada correctamente via {canal}",
         "fuente":     data.get("fuente", ""),
     }).execute()
 
@@ -381,7 +432,6 @@ def procesar():
     if not data:
         return jsonify({"error": "Body JSON requerido"}), 400
 
-    # Canal de origen: 'app' (web), 'telegram', etc.
     canal = data.get("canal", "app")
 
     try:
@@ -396,14 +446,11 @@ def procesar():
             mime_type = data.get("mime_type", "image/jpeg")
             imagen_b64 = data["imagen_b64"]
 
-            # PDFs con texto nativo → markitdown + llama-3.3-70b
-            # PDFs escaneados / imágenes → llama-4-scout (visión)
             if mime_type == "application/pdf":
                 try:
                     pdf_bytes = base64.b64decode(imagen_b64)
                     resultado = parse_pdf_texto(pdf_bytes, api_key)
                 except Exception:
-                    # PDF escaneado sin texto — fallback a visión
                     resultado = parse_imagen_groq(imagen_b64, mime_type, api_key)
             else:
                 resultado = parse_imagen_groq(imagen_b64, mime_type, api_key)
@@ -426,3 +473,87 @@ def procesar():
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=8080)
+```
+
+---
+
+## PASO 4 — Verificar el Secret de Kubernetes
+
+Verifica que el secret `worker-ocr-secret` en el namespace `pyme-test` tiene la key `GROQ_API_KEY` (no `GEMINI_API_KEY`):
+
+```bash
+kubectl get secret worker-ocr-secret -n pyme-test -o jsonpath='{.data}' | python3 -c "import sys,json; d=json.load(sys.stdin); print(list(d.keys()))"
+```
+
+Si el secret tiene `GEMINI_API_KEY` en lugar de `GROQ_API_KEY`, actualízalo:
+
+```bash
+# Opción A — editar el secret existente (reemplaza TU_GROQ_API_KEY con la key real)
+kubectl create secret generic worker-ocr-secret \
+  --from-literal=GROQ_API_KEY=TU_GROQ_API_KEY \
+  --from-literal=SUPABASE_URL=$(kubectl get secret worker-ocr-secret -n pyme-test -o jsonpath='{.data.SUPABASE_URL}' | base64 -d) \
+  --from-literal=SUPABASE_KEY=$(kubectl get secret worker-ocr-secret -n pyme-test -o jsonpath='{.data.SUPABASE_KEY}' | base64 -d) \
+  -n pyme-test --dry-run=client -o yaml | kubectl apply -f -
+```
+
+---
+
+## PASO 5 — Reconstruir la imagen Docker y redesplegar
+
+```bash
+# Apuntar Docker al daemon de minikube
+eval $(minikube docker-env)
+
+# Ir al directorio del proyecto (usa la ruta que encontraste en el Paso 1)
+cd /ruta/al/proyecto
+
+# Reconstruir la imagen
+docker build -t worker-ocr:latest worker-ocr/
+
+# Reiniciar el deployment para que tome la nueva imagen
+kubectl rollout restart deployment/worker-ocr -n pyme-test
+
+# Esperar que el pod esté Ready
+kubectl rollout status deployment/worker-ocr -n pyme-test
+```
+
+---
+
+## PASO 6 — Verificar que funciona
+
+```bash
+# Ver logs del pod nuevo
+kubectl logs -n pyme-test deployment/worker-ocr --tail=30
+
+# Probar el health endpoint
+curl http://localhost:30080/health
+# Debe responder: {"status":"ok","version":"5.0"}
+```
+
+Si el health responde `"version":"5.0"` el deploy fue exitoso.
+
+---
+
+## PASO 7 — (Opcional) Probar con un PDF de prueba
+
+```bash
+# Prueba rápida con la API directa (reemplaza con un PDF en base64 real)
+curl -X POST http://localhost:30080/procesar \
+  -H "Content-Type: application/json" \
+  -d '{"imagen_b64": "AQUI_BASE64_DEL_PDF", "mime_type": "application/pdf", "canal": "telegram"}' \
+  | python3 -m json.tool
+```
+
+La respuesta debe tener `"ok": true` y los campos `data.proveedor.nombre`, `data.documento.numero`, `data.totales.total_pagar` con valores reales (no vacíos).
+
+---
+
+## Resumen de qué cambió y por qué
+
+| Problema | Causa | Solución |
+|---|---|---|
+| Todos los campos N/D en Telegram | `main.py` usaba Gemini (`GEMINI_API_KEY`) que ya no existe en el secret | Migrado a Groq (`GROQ_API_KEY`) |
+| Error silencioso al guardar | `guardar_en_supabase` insertaba en tabla `pagos` que no existe | Eliminado ese insert |
+| No se distinguían facturas de Telegram | No había campo `canal` | Acepta `"canal"` en el body, lo guarda en Supabase |
+
+**No toques el archivo `k8s/worker-ocr.yaml`** — el Deployment ya monta el secret correctamente, solo necesitaba que el código usara `GROQ_API_KEY`.

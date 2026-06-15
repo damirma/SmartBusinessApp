@@ -13,6 +13,10 @@
 
 <ion-content class="facturas-content">
 
+  <ion-refresher slot="fixed" (ionRefresh)="doRefresh($event)">
+    <ion-refresher-content></ion-refresher-content>
+  </ion-refresher>
+
   <!-- ── Lote chip ──────────────────────────────────────────────────────── -->
   @if (filtroLote()) {
     <div class="lote-chip">
@@ -30,27 +34,35 @@
     <h1 class="page-title">Mis facturas</h1>
   </div>
 
-  <!-- ── Resumen card ───────────────────────────────────────────────────── -->
+  <!-- ── Resumen card (stats clicables = filtro de estado) ──────────────── -->
   <div class="resumen-card">
-    <div class="resumen-item">
+    <button class="resumen-item"
+      [class.resumen-item--active]="filtroEstado() === 'todos'"
+      (click)="filtroEstado.set('todos')">
       <span class="ri-val">{{ resumen().total }}</span>
       <span class="ri-label">Total</span>
-    </div>
+    </button>
     <div class="resumen-div"></div>
-    <div class="resumen-item">
+    <button class="resumen-item"
+      [class.resumen-item--active]="filtroEstado() === 'pendiente'"
+      (click)="toggleEstado('pendiente')">
       <span class="ri-val ri-val--warn">{{ resumen().pendientes }}</span>
       <span class="ri-label">Pendientes</span>
-    </div>
+    </button>
     <div class="resumen-div"></div>
-    <div class="resumen-item">
+    <button class="resumen-item"
+      [class.resumen-item--active]="filtroEstado() === 'pagada'"
+      (click)="toggleEstado('pagada')">
       <span class="ri-val ri-val--ok">{{ resumen().pagadas }}</span>
       <span class="ri-label">Pagadas</span>
-    </div>
+    </button>
     <div class="resumen-div"></div>
-    <div class="resumen-item">
+    <button class="resumen-item"
+      [class.resumen-item--active]="filtroEstado() === 'vencida'"
+      (click)="toggleEstado('vencida')">
       <span class="ri-val ri-val--danger">{{ resumen().vencidas }}</span>
       <span class="ri-label">Vencidas</span>
-    </div>
+    </button>
   </div>
 
   <!-- ── Monto pendiente ────────────────────────────────────────────────── -->
@@ -66,7 +78,7 @@
     <ion-icon name="search-outline" class="search-bar__icon"></ion-icon>
     <input
       type="text"
-      placeholder="Buscar por proveedor, número..."
+      placeholder="Buscar por proveedor, número, NIT..."
       [value]="busqueda()"
       (input)="setBusqueda($any($event.target).value)"
       class="search-bar__input"
@@ -78,37 +90,54 @@
     }
   </div>
 
-  <!-- ── Chips de estado ────────────────────────────────────────────────── -->
+  <!-- ── Chips de origen ────────────────────────────────────────────────── -->
   <div class="filter-chips">
     <button class="chip"
-      [class.chip--active]="filtroEstado() === 'todos'"
-      (click)="setFiltroEstado('todos')">Todos</button>
+      [class.chip--active]="filtroOrigen() === 'todos'"
+      (click)="filtroOrigen.set('todos')">Todo origen</button>
     <button class="chip"
-      [class.chip--active]="filtroEstado() === 'pendiente'"
-      (click)="setFiltroEstado('pendiente')">Pendientes</button>
-    <button class="chip"
-      [class.chip--active]="filtroEstado() === 'pagada'"
-      (click)="setFiltroEstado('pagada')">Pagadas</button>
-    <button class="chip"
-      [class.chip--active]="filtroEstado() === 'vencida'"
-      (click)="setFiltroEstado('vencida')">Vencidas</button>
+      [class.chip--active]="filtroOrigen() === 'app'"
+      (click)="toggleOrigen('app')">
+      <ion-icon name="phone-portrait-outline"></ion-icon>
+      App
+    </button>
+    <button class="chip chip--telegram"
+      [class.chip--active]="filtroOrigen() === 'telegram'"
+      (click)="toggleOrigen('telegram')">
+      <ion-icon name="paper-plane-outline"></ion-icon>
+      Telegram
+    </button>
   </div>
 
   <!-- ── Chips de rango de fecha ────────────────────────────────────────── -->
   <div class="filter-chips filter-chips--secondary">
     <button class="chip chip--sm"
       [class.chip--active]="rangoFecha() === 'todo'"
-      (click)="setRango('todo')">Todo</button>
+      (click)="rangoFecha.set('todo')">Todo</button>
     <button class="chip chip--sm"
       [class.chip--active]="rangoFecha() === 'mes'"
-      (click)="setRango('mes')">Este mes</button>
+      (click)="toggleRango('mes')">Este mes</button>
     <button class="chip chip--sm"
       [class.chip--active]="rangoFecha() === 'mes-ant'"
-      (click)="setRango('mes-ant')">Mes pasado</button>
+      (click)="toggleRango('mes-ant')">Mes pasado</button>
     <button class="chip chip--sm"
       [class.chip--active]="rangoFecha() === '90d'"
-      (click)="setRango('90d')">90 días</button>
+      (click)="toggleRango('90d')">90 días</button>
   </div>
+
+  <!-- ── Barra de filtros activos ───────────────────────────────────────── -->
+  @if (filtrosActivos() > 0) {
+    <div class="active-filters">
+      <span class="active-filters__label">
+        <ion-icon name="funnel-outline"></ion-icon>
+        {{ filtrosActivos() }} {{ filtrosActivos() === 1 ? 'filtro activo' : 'filtros activos' }}
+      </span>
+      <button class="active-filters__clear" (click)="clearFiltros()">
+        <ion-icon name="close-outline"></ion-icon>
+        Limpiar
+      </button>
+    </div>
+  }
 
   <!-- ── Controls: agrupación + orden ──────────────────────────────────── -->
   <div class="controls-bar">
@@ -200,9 +229,17 @@
           <div class="factura-card" (click)="verDetalle(f)">
 
             <div class="fc-left">
-              <div class="fc-estado-dot" [class]="'fc-estado-dot--' + (f.estado ?? 'pendiente')"></div>
+              <div class="fc-estado-dot" [class]="'fc-estado-dot--' + estadoEfectivo(f)"></div>
               <div class="fc-info">
-                <p class="fc-numero">{{ f.numero || f.numero_factura || '—' }}</p>
+                <p class="fc-numero">
+                  {{ f.numero || f.numero_factura || '—' }}
+                  @if (f.canal === 'telegram') {
+                    <span class="fc-badge-telegram">
+                      <ion-icon name="paper-plane-outline"></ion-icon>
+                      Bot
+                    </span>
+                  }
+                </p>
                 <p class="fc-proveedor">{{ f.proveedor_nombre || '—' }}</p>
                 <p class="fc-fecha">
                   {{ f.fecha_emision ? (f.fecha_emision | date:'d MMM yyyy':'':'es-CO') : '—' }}
@@ -212,13 +249,13 @@
 
             <div class="fc-right">
               <p class="fc-total">{{ (f.total_pagar ?? 0) | currency:'COP':'$':'1.0-0' }}</p>
-              <span class="fc-badge" [class]="'fc-badge--' + (f.estado ?? 'pendiente')">
-                {{ estadoLabel(f.estado) }}
+              <span class="fc-badge" [class]="'fc-badge--' + estadoEfectivo(f)">
+                {{ estadoLabel(estadoEfectivo(f)) }}
               </span>
               @if (f.editado_por_usuario) {
                 <span class="fc-badge-corregido">Corregido</span>
               }
-              @if (f.fecha_vencimiento && f.estado !== 'pagada') {
+              @if (f.fecha_vencimiento && estadoEfectivo(f) !== 'pagada') {
                 <p class="fc-vence">Vence {{ f.fecha_vencimiento | date:'d MMM':'':'es-CO' }}</p>
               }
             </div>

@@ -105,6 +105,22 @@ ion-toolbar {
   flex-direction: column;
   align-items:    center;
   gap:            3px;
+  background:     none;
+  border:         none;
+  padding:        6px 2px;
+  border-radius:  var(--sb-radius-sm);
+  cursor:         pointer;
+  transition:     background var(--sb-transition-fast),
+                  box-shadow var(--sb-transition-fast);
+
+  &:hover { background: var(--sb-bg-overlay); }
+
+  &--active {
+    background:  var(--sb-bg-overlay);
+    box-shadow:  inset 0 0 0 1px var(--sb-border-light);
+  }
+
+  &:active { transform: scale(0.97); }
 }
 
 .resumen-div {
@@ -228,6 +244,9 @@ ion-toolbar {
 
 .chip {
   flex-shrink:   0;
+  display:       inline-flex;
+  align-items:   center;
+  gap:           5px;
   background:    var(--sb-bg-card);
   border:        1px solid var(--sb-border-subtle);
   border-radius: var(--sb-radius-full);
@@ -241,6 +260,8 @@ ion-toolbar {
                  color      var(--sb-transition-fast),
                  border-color var(--sb-transition-fast);
 
+  ion-icon { font-size: 13px; }
+
   &--sm {
     padding:   5px 12px;
     font-size: var(--sb-text-xs);
@@ -252,10 +273,59 @@ ion-toolbar {
     color:        var(--sb-text-accent);
   }
 
+  // Telegram chip: acento azul cuando está activo
+  &--telegram.chip--active {
+    background:   rgba(39, 174, 223, 0.14);
+    border-color: rgba(39, 174, 223, 0.45);
+    color:        #27AEDF;
+  }
+
   &:not(.chip--active):hover {
     background:   var(--sb-bg-overlay);
     border-color: var(--sb-border-light);
     color:        var(--sb-text-primary);
+  }
+}
+
+// ── Active filters bar ──────────────────────────────────────────────────────
+.active-filters {
+  display:         flex;
+  align-items:     center;
+  justify-content: space-between;
+  margin:          var(--sb-space-md) var(--sb-space-md) 0;
+  padding:         8px 14px;
+  background:      var(--sb-bg-card);
+  border:          1px solid var(--sb-border-subtle);
+  border-radius:   var(--sb-radius-md);
+
+  &__label {
+    display:     flex;
+    align-items: center;
+    gap:         6px;
+    font-size:   var(--sb-text-sm);
+    font-weight: var(--sb-font-semibold);
+    color:       var(--sb-text-secondary);
+
+    ion-icon { font-size: 15px; color: var(--sb-text-accent); }
+  }
+
+  &__clear {
+    display:       flex;
+    align-items:   center;
+    gap:           4px;
+    background:    none;
+    border:        none;
+    padding:       4px 10px;
+    border-radius: var(--sb-radius-full);
+    font-size:     var(--sb-text-xs);
+    font-weight:   var(--sb-font-bold);
+    color:         var(--sb-text-accent);
+    cursor:        pointer;
+    transition:    background var(--sb-transition-fast);
+
+    ion-icon { font-size: 14px; }
+
+    &:hover { background: var(--sb-accent-dim); }
   }
 }
 
@@ -587,15 +657,16 @@ ion-toolbar {
 }
 
 .fc-numero {
+  display:        flex;
+  align-items:    center;
+  gap:            6px;
   font-family:    var(--sb-font-family-mono);
   font-size:      var(--sb-text-sm);
   font-weight:    var(--sb-font-semibold);
   color:          var(--sb-text-primary);
   margin:         0;
-  white-space:    nowrap;
-  overflow:       hidden;
-  text-overflow:  ellipsis;
   letter-spacing: -0.2px;
+  min-width:      0;
 }
 
 .fc-proveedor {
@@ -677,6 +748,24 @@ ion-toolbar {
   background:     rgba(83, 130, 255, 0.12);
   color:          #5382FF;
   border:         1px solid rgba(83, 130, 255, 0.25);
+}
+
+.fc-badge-telegram {
+  display:        inline-flex;
+  align-items:    center;
+  gap:            3px;
+  flex-shrink:    0;
+  font-size:      10px;
+  font-weight:    var(--sb-font-bold);
+  padding:        2px 7px;
+  border-radius:  var(--sb-radius-full);
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  background:     rgba(39, 174, 223, 0.12);
+  color:          #27AEDF;
+  border:         1px solid rgba(39, 174, 223, 0.25);
+
+  ion-icon { font-size: 11px; }
 }
 
 .fc-vence {

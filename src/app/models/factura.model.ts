@@ -71,6 +71,11 @@ export interface Factura {
   raw_json?: unknown;
   procesado_en?: string;
   editado_por_usuario?: boolean;
+  canal?: string;
+  fuente?: string;
+  numero?: string;
+  proveedor_nombre?: string;
+  proveedor_nit?: string;
   // Relaciones (cuando se hace SELECT con JOIN)
   factura_items?: FacturaItem[];
   factura_impuestos?: FacturaImpuesto[];
