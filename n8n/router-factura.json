@@ -1,0 +1,575 @@
+[
+ {
+  "updatedAt": "2026-06-03T06:15:51.667Z",
+  "createdAt": "2026-06-03T01:29:28.763Z",
+  "id": "kvXY1jH2Gvjkr7rK",
+  "name": "Router Factura",
+  "description": null,
+  "active": true,
+  "isArchived": false,
+  "nodes": [
+   {
+    "parameters": {
+     "httpMethod": "POST",
+     "path": "procesar-factura",
+     "responseMode": "responseNode",
+     "options": {}
+    },
+    "id": "wh-input",
+    "name": "Webhook Entrada",
+    "type": "n8n-nodes-base.webhook",
+    "typeVersion": 2,
+    "position": [
+     160,
+     320
+    ],
+    "webhookId": "d243263e-20f2-4092-a037-661571669e30"
+   },
+   {
+    "parameters": {
+     "assignments": {
+      "assignments": [
+       {
+        "id": "a1",
+        "name": "mime_norm",
+        "type": "string",
+        "value": "={{ ($json.body?.mime_type || '').toLowerCase() }}"
+       },
+       {
+        "id": "a2",
+        "name": "archivo_b64",
+        "type": "string",
+        "value": "={{ $json.body?.archivo_b64 || '' }}"
+       },
+       {
+        "id": "a3",
+        "name": "origen",
+        "type": "string",
+        "value": "={{ $json.body?.origen || 'app' }}"
+       },
+       {
+        "id": "a4",
+        "name": "ts_inicio",
+        "type": "number",
+        "value": "={{ Date.now() }}"
+       },
+       {
+        "id": "a5",
+        "name": "mime_type_orig",
+        "type": "string",
+        "value": "={{ $json.body?.mime_type || '' }}"
+       }
+      ]
+     },
+     "options": {}
+    },
+    "id": "set-norm",
+    "name": "Normalizar Input",
+    "type": "n8n-nodes-base.set",
+    "typeVersion": 3.4,
+    "position": [
+     400,
+     320
+    ]
+   },
+   {
+    "parameters": {
+     "rules": {
+      "values": [
+       {
+        "conditions": {
+         "combinator": "and",
+         "conditions": [
+          {
+           "id": "r0",
+           "leftValue": "={{ $json.mime_norm }}",
+           "rightValue": "xml",
+           "operator": {
+            "type": "string",
+            "operation": "contains"
+           }
+          }
+         ],
+         "options": {
+          "caseSensitive": false,
+          "leftValue": "",
+          "typeValidation": "loose",
+          "version": 2
+         }
+        }
+       },
+       {
+        "conditions": {
+         "combinator": "and",
+         "conditions": [
+          {
+           "id": "r1",
+           "leftValue": "={{ $json.mime_norm }}",
+           "rightValue": "pdf",
+           "operator": {
+            "type": "string",
+            "operation": "contains"
+           }
+          }
+         ],
+         "options": {
+          "caseSensitive": false,
+          "leftValue": "",
+          "typeValidation": "loose",
+          "version": 2
+         }
+        }
+       },
+       {
+        "conditions": {
+         "combinator": "and",
+         "conditions": [
+          {
+           "id": "r2",
+           "leftValue": "={{ $json.mime_norm }}",
+           "rightValue": "image/",
+           "operator": {
+            "type": "string",
+            "operation": "startsWith"
+           }
+          }
+         ],
+         "options": {
+          "caseSensitive": false,
+          "leftValue": "",
+          "typeValidation": "loose",
+          "version": 2
+         }
+        }
+       },
+       {
+        "conditions": {
+         "combinator": "and",
+         "conditions": [
+          {
+           "id": "r3",
+           "leftValue": "=true",
+           "rightValue": "true",
+           "operator": {
+            "type": "string",
+            "operation": "equals"
+           }
+          }
+         ],
+         "options": {
+          "caseSensitive": false,
+          "leftValue": "",
+          "typeValidation": "loose",
+          "version": 2
+         }
+        }
+       }
+      ]
+     },
+     "options": {}
+    },
+    "id": "sw-mime",
+    "name": "Switch MIME",
+    "type": "n8n-nodes-base.switch",
+    "typeVersion": 3,
+    "position": [
+     640,
+     320
+    ]
+   },
+   {
+    "parameters": {
+     "jsCode": "const item = $input.first().json;\nconst xmlContent = Buffer.from(item.archivo_b64, 'base64').toString('utf-8');\nreturn [{ json: { ...item, xml_content: xmlContent } }];"
+    },
+    "id": "code-xml",
+    "name": "Decodificar XML",
+    "type": "n8n-nodes-base.code",
+    "typeVersion": 2,
+    "position": [
+     880,
+     80
+    ]
+   },
+   {
+    "parameters": {
+     "method": "POST",
+     "url": "http://worker-ocr-svc.pyme-test.svc.cluster.local/procesar",
+     "sendBody": true,
+     "contentType": "raw",
+     "rawContentType": "application/json",
+     "body": "={{ JSON.stringify({ \"xml_content\": $json.xml_content, \"canal\": $json.origen }) }}",
+     "options": {}
+    },
+    "id": "http-xml",
+    "name": "HTTP XML → Worker",
+    "type": "n8n-nodes-base.httpRequest",
+    "typeVersion": 4,
+    "position": [
+     1120,
+     80
+    ],
+    "onError": "continueRegularOutput"
+   },
+   {
+    "parameters": {
+     "method": "POST",
+     "url": "http://worker-ocr-svc.pyme-test.svc.cluster.local/procesar",
+     "sendBody": true,
+     "contentType": "raw",
+     "rawContentType": "application/json",
+     "body": "={{ JSON.stringify({ \"imagen_b64\": $json.archivo_b64, \"mime_type\": $json.mime_type_orig, \"canal\": $json.origen }) }}",
+     "options": {}
+    },
+    "id": "http-pdf",
+    "name": "HTTP PDF → Worker",
+    "type": "n8n-nodes-base.httpRequest",
+    "typeVersion": 4,
+    "position": [
+     880,
+     288
+    ],
+    "onError": "continueRegularOutput"
+   },
+   {
+    "parameters": {
+     "method": "POST",
+     "url": "http://worker-ocr-svc.pyme-test.svc.cluster.local/procesar",
+     "sendBody": true,
+     "contentType": "raw",
+     "rawContentType": "application/json",
+     "body": "={{ JSON.stringify({ \"imagen_b64\": $json.archivo_b64, \"mime_type\": $json.mime_type_orig, \"canal\": $json.origen }) }}",
+     "options": {}
+    },
+    "id": "http-img",
+    "name": "HTTP IMG → Worker",
+    "type": "n8n-nodes-base.httpRequest",
+    "typeVersion": 4,
+    "position": [
+     880,
+     480
+    ],
+    "onError": "continueRegularOutput"
+   },
+   {
+    "parameters": {
+     "respondWith": "json",
+     "responseBody": "={{ JSON.stringify({ \"ok\": false, \"error\": \"Formato no soportado\", \"mime_recibido\": $json.mime_type_orig }) }}",
+     "options": {
+      "responseCode": 400
+     }
+    },
+    "id": "respond-400",
+    "name": "Respond 400 Formato",
+    "type": "n8n-nodes-base.respondToWebhook",
+    "typeVersion": 1.1,
+    "position": [
+     880,
+     688
+    ]
+   },
+   {
+    "parameters": {
+     "numberInputs": 3
+    },
+    "id": "merge-results",
+    "name": "Merge Resultados",
+    "type": "n8n-nodes-base.merge",
+    "typeVersion": 3,
+    "position": [
+     1360,
+     288
+    ]
+   },
+   {
+    "parameters": {
+     "conditions": {
+      "options": {
+       "caseSensitive": true,
+       "leftValue": "",
+       "typeValidation": "strict",
+       "version": 1
+      },
+      "conditions": [
+       {
+        "id": "c1",
+        "leftValue": "={{ $json.ok }}",
+        "rightValue": "true",
+        "operator": {
+         "type": "boolean",
+         "operation": "true",
+         "singleValue": true
+        }
+       }
+      ],
+      "combinator": "and"
+     },
+     "options": {}
+    },
+    "id": "if-worker-ok",
+    "name": "IF Worker OK",
+    "type": "n8n-nodes-base.if",
+    "typeVersion": 2,
+    "position": [
+     1600,
+     288
+    ]
+   },
+   {
+    "parameters": {
+     "assignments": {
+      "assignments": [
+       {
+        "id": "s1",
+        "name": "ok",
+        "type": "boolean",
+        "value": "={{ true }}"
+       },
+       {
+        "id": "s2",
+        "name": "origen",
+        "type": "string",
+        "value": "={{ $('Normalizar Input').item.json.origen }}"
+       },
+       {
+        "id": "s3",
+        "name": "tiempo_ms",
+        "type": "number",
+        "value": "={{ Date.now() - $('Normalizar Input').item.json.ts_inicio }}"
+       },
+       {
+        "id": "s4",
+        "name": "guardado",
+        "type": "object",
+        "value": "={{ $json.guardado || {} }}"
+       },
+       {
+        "id": "s5",
+        "name": "data",
+        "type": "object",
+        "value": "={{ $json.data?.data ?? $json.data }}"
+       }
+      ]
+     },
+     "options": {}
+    },
+    "id": "set-success",
+    "name": "Set Éxito",
+    "type": "n8n-nodes-base.set",
+    "typeVersion": 3.4,
+    "position": [
+     1840,
+     160
+    ]
+   },
+   {
+    "parameters": {
+     "respondWith": "json",
+     "responseBody": "={{ JSON.stringify($json) }}",
+     "options": {
+      "responseCode": 200
+     }
+    },
+    "id": "respond-200",
+    "name": "Respond 200 Éxito",
+    "type": "n8n-nodes-base.respondToWebhook",
+    "typeVersion": 1.1,
+    "position": [
+     2080,
+     160
+    ]
+   },
+   {
+    "parameters": {
+     "respondWith": "json",
+     "responseBody": "={{ JSON.stringify({ \"ok\": false, \"error\": $json.error || \"Error procesando factura\" }) }}",
+     "options": {
+      "responseCode": 502
+     }
+    },
+    "id": "respond-502",
+    "name": "Respond 502 Error Worker",
+    "type": "n8n-nodes-base.respondToWebhook",
+    "typeVersion": 1.1,
+    "position": [
+     1840,
+     400
+    ]
+   }
+  ],
+  "connections": {
+   "Webhook Entrada": {
+    "main": [
+     [
+      {
+       "node": "Normalizar Input",
+       "type": "main",
+       "index": 0
+      }
+     ]
+    ]
+   },
+   "Normalizar Input": {
+    "main": [
+     [
+      {
+       "node": "Switch MIME",
+       "type": "main",
+       "index": 0
+      }
+     ]
+    ]
+   },
+   "Switch MIME": {
+    "main": [
+     [
+      {
+       "node": "Decodificar XML",
+       "type": "main",
+       "index": 0
+      }
+     ],
+     [
+      {
+       "node": "HTTP PDF → Worker",
+       "type": "main",
+       "index": 0
+      }
+     ],
+     [
+      {
+       "node": "HTTP IMG → Worker",
+       "type": "main",
+       "index": 0
+      }
+     ],
+     [
+      {
+       "node": "Respond 400 Formato",
+       "type": "main",
+       "index": 0
+      }
+     ]
+    ]
+   },
+   "Decodificar XML": {
+    "main": [
+     [
+      {
+       "node": "HTTP XML → Worker",
+       "type": "main",
+       "index": 0
+      }
+     ]
+    ]
+   },
+   "HTTP XML → Worker": {
+    "main": [
+     [
+      {
+       "node": "Merge Resultados",
+       "type": "main",
+       "index": 0
+      }
+     ]
+    ]
+   },
+   "HTTP PDF → Worker": {
+    "main": [
+     [
+      {
+       "node": "Merge Resultados",
+       "type": "main",
+       "index": 1
+      }
+     ]
+    ]
+   },
+   "HTTP IMG → Worker": {
+    "main": [
+     [
+      {
+       "node": "Merge Resultados",
+       "type": "main",
+       "index": 2
+      }
+     ]
+    ]
+   },
+   "Merge Resultados": {
+    "main": [
+     [
+      {
+       "node": "IF Worker OK",
+       "type": "main",
+       "index": 0
+      }
+     ]
+    ]
+   },
+   "IF Worker OK": {
+    "main": [
+     [
+      {
+       "node": "Set Éxito",
+       "type": "main",
+       "index": 0
+      }
+     ],
+     [
+      {
+       "node": "Respond 502 Error Worker",
+       "type": "main",
+       "index": 0
+      }
+     ]
+    ]
+   },
+   "Set Éxito": {
+    "main": [
+     [
+      {
+       "node": "Respond 200 Éxito",
+       "type": "main",
+       "index": 0
+      }
+     ]
+    ]
+   }
+  },
+  "settings": {
+   "executionOrder": "v1",
+   "binaryMode": "separate"
+  },
+  "staticData": null,
+  "meta": null,
+  "pinData": {},
+  "versionId": "e63c6d12-1dbd-4da0-ac5e-0ed9fd3dfc4b",
+  "activeVersionId": "e63c6d12-1dbd-4da0-ac5e-0ed9fd3dfc4b",
+  "versionCounter": 20,
+  "triggerCount": 1,
+  "tags": [],
+  "shared": [
+   {
+    "updatedAt": "2026-06-03T01:29:28.809Z",
+    "createdAt": "2026-06-03T01:29:28.809Z",
+    "role": "workflow:owner",
+    "workflowId": "kvXY1jH2Gvjkr7rK",
+    "projectId": "fSmcR7Pf7qiMaeRa",
+    "project": {
+     "updatedAt": "2026-04-28T18:46:04.165Z",
+     "createdAt": "2026-04-28T18:43:08.507Z",
+     "id": "fSmcR7Pf7qiMaeRa",
+     "name": "Erik Gil <erickfabrizio01@gmail.com>",
+     "type": "personal",
+     "icon": null,
+     "description": null,
+     "creatorId": "7cf9b83d-5460-41aa-b639-2d211480ae24"
+    }
+   }
+  ],
+  "versionMetadata": {
+   "name": "Version e63c6d12",
+   "description": ""
+  }
+ }
+]

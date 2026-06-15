@@ -1,6 +1,6 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
-import os, re, json, xml.etree.ElementTree as ET, base64, tempfile
+import os, re, json, base64, xml.etree.ElementTree as ET
 from datetime import datetime
 
 app = Flask(__name__)
@@ -11,6 +11,10 @@ NS = {
     "cac": "urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2",
     "sts": "dian:gov:co:facturaelectronica:Structures-2-1",
 }
+
+MODELO_GEMINI = os.getenv("GEMINI_MODEL", "gemini-2.5-flash")
+
+# ── Helpers XML ───────────────────────────────────────────────────────────────
 
 def t(el, path, default=""):
     node = el.find(path, NS)
@@ -62,10 +66,19 @@ def parse_xml(xml_content):
         if desc is None or not desc.text:
             raise ValueError("AttachedDocument sin Invoice embebida")
         inv = ET.fromstring(desc.text.strip().encode("utf-8"))
-    elif tag == "Invoice":
+    elif tag in ("Invoice", "CreditNote", "DebitNote"):
         inv = root
     else:
         raise ValueError(f"Tipo XML no reconocido: {tag}")
+
+    # InvoiceLine / CreditNoteLine / DebitNoteLine
+    line_tag = "cac:InvoiceLine"
+    qty_tag  = "cbc:InvoicedQuantity"
+    inv_tag  = inv.tag.split("}")[-1] if "}" in inv.tag else inv.tag
+    if inv_tag == "CreditNote":
+        line_tag, qty_tag = "cac:CreditNoteLine", "cbc:CreditedQuantity"
+    elif inv_tag == "DebitNote":
+        line_tag, qty_tag = "cac:DebitNoteLine", "cbc:DebitedQuantity"
 
     ctrl = inv.find(".//sts:InvoiceControl", NS)
     autorizacion = {}
@@ -80,12 +93,12 @@ def parse_xml(xml_content):
         }
 
     items = []
-    for line in inv.findall("cac:InvoiceLine", NS):
+    for line in inv.findall(line_tag, NS):
         items.append({
             "numero_linea":   t(line, "cbc:ID"),
             "descripcion":    t(line, "cac:Item/cbc:Description"),
-            "cantidad":       t(line, "cbc:InvoicedQuantity"),
-            "unidad":         a(line, "cbc:InvoicedQuantity", "unitCode"),
+            "cantidad":       t(line, qty_tag),
+            "unidad":         a(line, qty_tag, "unitCode"),
             "valor_unitario": t(line, "cac:Price/cbc:PriceAmount"),
             "valor_total":    t(line, "cbc:LineExtensionAmount"),
         })
@@ -101,6 +114,8 @@ def parse_xml(xml_content):
             })
 
     lma = inv.find("cac:LegalMonetaryTotal", NS)
+    if lma is None:
+        lma = inv.find("cac:RequestedMonetaryTotal", NS)
     totales = {}
     if lma is not None:
         totales = {
@@ -130,7 +145,7 @@ def parse_xml(xml_content):
         "procesado_en": datetime.utcnow().isoformat() + "Z",
         "documento": {
             "numero":            t(inv, "cbc:ID"),
-            "tipo":              t(inv, "cbc:InvoiceTypeCode"),
+            "tipo":              t(inv, "cbc:InvoiceTypeCode") or inv_tag,
             "cufe":              t(inv, "cbc:UUID"),
             "fecha_emision":     t(inv, "cbc:IssueDate"),
             "hora_emision":      t(inv, "cbc:IssueTime"),
@@ -151,118 +166,73 @@ def parse_xml(xml_content):
     }
 
 
-PROMPT_FACTURA = """Eres experto en facturación electrónica colombiana DIAN.
-Analiza el documento y responde SOLO con JSON válido, sin markdown ni texto extra.
-Estructura exacta requerida:
+# ── IA: Gemini (PDF e imagen) ─────────────────────────────────────────────────
+
+PROMPT_FACTURA = """Eres experto en facturacion electronica colombiana (DIAN).
+Analiza el documento y extrae TODOS los datos con maxima precision.
+Responde UNICAMENTE con JSON valido. Sin markdown, sin texto extra.
+
 {
-  "fuente": "imagen_groq",
-  "documento": {
-    "numero": "",
-    "tipo": "",
-    "cufe": "",
-    "fecha_emision": "",
-    "hora_emision": "",
-    "moneda": "COP",
-    "observaciones": ""
-  },
-  "proveedor": {
-    "nombre": "",
-    "nit": "",
-    "direccion": {"linea": "", "ciudad": ""},
-    "email": "",
-    "telefono": ""
-  },
-  "cliente": {
-    "nombre": "",
-    "nit": "",
-    "direccion": {"ciudad": ""}
-  },
-  "pago": {
-    "forma": "",
-    "fecha_vencimiento": ""
-  },
-  "items": [
-    {"numero_linea": "1", "descripcion": "", "cantidad": "", "unidad": "", "valor_unitario": "", "valor_total": ""}
-  ],
-  "impuestos": [
-    {"nombre": "IVA", "porcentaje": "", "base": "", "valor": ""}
-  ],
-  "totales": {
-    "subtotal": "",
-    "total_con_impuesto": "",
-    "total_pagar": ""
-  }
+  "documento": {"numero":"","tipo":"","cufe":"","fecha_emision":"YYYY-MM-DD","hora_emision":"","moneda":"COP","observaciones":""},
+  "proveedor": {"nombre":"","nit":"","direccion":{"linea":"","ciudad":""},"email":"","telefono":""},
+  "cliente":   {"nombre":"","nit":"","direccion":{"ciudad":""},"email":""},
+  "pago":      {"forma":"","fecha_vencimiento":""},
+  "items":     [{"numero_linea":"1","descripcion":"","cantidad":"","unidad":"","valor_unitario":"","valor_total":""}],
+  "impuestos": [{"nombre":"IVA","porcentaje":"","base":"","valor":""}],
+  "totales":   {"subtotal":"","total_con_impuesto":"","total_pagar":""}
 }
-Reglas: valores monetarios sin puntos de miles (ej: 1663200.00), campos ausentes como string vacío."""
+
+REGLAS CRITICAS:
+1. NUMERO DE FACTURA: es el ID del documento (ej "FE-1234", "FV0001", "SETP123456").
+   Busca "Factura No.", "No. Factura", "Numero". NO uses el CUFE como numero.
+2. NIT: SOLO los digitos, SIN guion ni digito de verificacion (ej "900123456-7" -> "900123456").
+   Proveedor = quien EMITE. Cliente = quien RECIBE. Son distintos.
+3. CUFE: cadena hexadecimal larga (96+ chars). Copiala completa y exacta sin espacios.
+4. VALORES MONETARIOS: sin puntos de miles, con punto decimal (ej 83300.00 no 83.300,00).
+5. FECHA: formato YYYY-MM-DD siempre.
+6. Campos ausentes: string vacio "". NUNCA null ni omitas la clave."""
 
 
-def parse_imagen_groq(imagen_b64, mime_type, api_key):
-    from groq import Groq
-    client = Groq(api_key=api_key)
-
-    response = client.chat.completions.create(
-        model="meta-llama/llama-4-scout-17b-16e-instruct",
-        messages=[{
-            "role": "user",
-            "content": [
-                {
-                    "type": "image_url",
-                    "image_url": {"url": f"data:{mime_type};base64,{imagen_b64}"},
-                },
-                {
-                    "type": "text",
-                    "text": PROMPT_FACTURA,
-                },
-            ],
-        }],
-        temperature=0.1,
-        max_tokens=4096,
-    )
-    raw = response.choices[0].message.content.strip()
-    raw = re.sub(r"^```(?:json)?\s*|\s*```$", "", raw, flags=re.MULTILINE).strip()
-    data = json.loads(raw)
-    data["procesado_en"] = datetime.utcnow().isoformat() + "Z"
-    data["fuente"] = "imagen_groq"
-    return data
+def _gemini_model(api_key):
+    import google.generativeai as genai
+    genai.configure(api_key=api_key)
+    return genai.GenerativeModel(MODELO_GEMINI)
 
 
-def parse_pdf_texto(pdf_bytes, api_key):
-    from markitdown import MarkItDown
-    from groq import Groq
-
-    tmp_path = None
+def _extraer_json(texto):
+    texto = re.sub(r"^```(?:json)?\s*", "", texto.strip(), flags=re.MULTILINE)
+    texto = re.sub(r"\s*```$", "", texto.strip(), flags=re.MULTILINE).strip()
     try:
-        with tempfile.NamedTemporaryFile(suffix=".pdf", delete=False) as f:
-            f.write(pdf_bytes)
-            tmp_path = f.name
+        return json.loads(texto)
+    except json.JSONDecodeError:
+        m = re.search(r"\{.*\}", texto, re.DOTALL)
+        if m:
+            return json.loads(m.group())
+        raise ValueError(f"JSON invalido de Gemini: {texto[:200]}")
 
-        md = MarkItDown()
-        result = md.convert(tmp_path)
-        markdown_text = result.text_content or ""
-    finally:
-        if tmp_path and os.path.exists(tmp_path):
-            os.unlink(tmp_path)
 
-    if len(markdown_text.strip()) < 100:
-        raise ValueError("PDF sin texto nativo suficiente — usar visión")
-
-    client = Groq(api_key=api_key)
-    response = client.chat.completions.create(
-        model="llama-3.3-70b-versatile",
-        messages=[
-            {"role": "system", "content": PROMPT_FACTURA},
-            {"role": "user",   "content": markdown_text},
+def parse_documento_gemini(doc_bytes, mime_type, api_key, fuente):
+    model = _gemini_model(api_key)
+    resp = model.generate_content(
+        [
+            {"mime_type": mime_type, "data": doc_bytes},
+            PROMPT_FACTURA,
         ],
-        temperature=0.1,
-        max_tokens=4096,
-        response_format={"type": "json_object"},
+        generation_config={
+            "temperature": 0,
+            "response_mime_type": "application/json",
+            "max_output_tokens": 8192,
+        },
     )
-    raw = response.choices[0].message.content.strip()
-    data = json.loads(raw)
+    data = _extraer_json(resp.text or "")
+    data.setdefault("items", [])
+    data.setdefault("impuestos", [])
     data["procesado_en"] = datetime.utcnow().isoformat() + "Z"
-    data["fuente"] = "pdf_texto_groq"
+    data["fuente"] = fuente
     return data
 
+
+# ── Supabase ──────────────────────────────────────────────────────────────────
 
 def guardar_en_supabase(data, canal="app"):
     from supabase import create_client
@@ -360,7 +330,7 @@ def guardar_en_supabase(data, canal="app"):
         "factura_id": factura_id,
         "pyme_id":    pyme_id,
         "evento":     "factura_procesada",
-        "detalle":    f"Factura {doc.get('numero')} procesada correctamente vía {canal}",
+        "detalle":    f"Factura {doc.get('numero')} procesada correctamente via {canal}",
         "fuente":     data.get("fuente", ""),
     }).execute()
 
@@ -371,9 +341,11 @@ def guardar_en_supabase(data, canal="app"):
     }
 
 
+# ── Rutas ─────────────────────────────────────────────────────────────────────
+
 @app.route("/health", methods=["GET"])
 def health():
-    return jsonify({"status": "ok", "version": "5.0"})
+    return jsonify({"status": "ok", "version": "6.0-gemini", "modelo": MODELO_GEMINI})
 
 @app.route("/procesar", methods=["POST"])
 def procesar():
@@ -381,7 +353,6 @@ def procesar():
     if not data:
         return jsonify({"error": "Body JSON requerido"}), 400
 
-    # Canal de origen: 'app' (web), 'telegram', etc.
     canal = data.get("canal", "app")
 
     try:
@@ -389,24 +360,14 @@ def procesar():
             resultado = parse_xml(data["xml_content"])
 
         elif "imagen_b64" in data:
-            api_key = os.getenv("GROQ_API_KEY")
+            api_key = os.getenv("GEMINI_API_KEY")
             if not api_key:
-                return jsonify({"error": "GROQ_API_KEY no configurada"}), 500
+                return jsonify({"error": "GEMINI_API_KEY no configurada"}), 500
 
-            mime_type = data.get("mime_type", "image/jpeg")
-            imagen_b64 = data["imagen_b64"]
-
-            # PDFs con texto nativo → markitdown + llama-3.3-70b
-            # PDFs escaneados / imágenes → llama-4-scout (visión)
-            if mime_type == "application/pdf":
-                try:
-                    pdf_bytes = base64.b64decode(imagen_b64)
-                    resultado = parse_pdf_texto(pdf_bytes, api_key)
-                except Exception:
-                    # PDF escaneado sin texto — fallback a visión
-                    resultado = parse_imagen_groq(imagen_b64, mime_type, api_key)
-            else:
-                resultado = parse_imagen_groq(imagen_b64, mime_type, api_key)
+            mime_type  = data.get("mime_type", "image/jpeg")
+            doc_bytes  = base64.b64decode(data["imagen_b64"])
+            fuente     = "pdf_gemini" if mime_type == "application/pdf" else "imagen_gemini"
+            resultado  = parse_documento_gemini(doc_bytes, mime_type, api_key, fuente)
 
         else:
             return jsonify({"error": "Envía xml_content o imagen_b64"}), 400
